@@ -1,0 +1,27 @@
+{
+  "dataset_name": "spot",
+  "sample_id": "spot_sample_004",
+  "index": 4,
+  "description": "CNES SPOT-6/7 high-resolution constellation reference",
+  "lr_shape": [
+    4,
+    128,
+    128
+  ],
+  "hr_shape": [
+    4,
+    512,
+    512
+  ],
+  "canonical_bands": [
+    "B04 (Red)",
+    "B03 (Green)",
+    "B02 (Blue)",
+    "B08 (NIR)"
+  ],
+  "lr_resolution": "10 m (Sentinel-2 L2A)",
+  "hr_resolution": "1.5 m (SPOT-6/7 Ortho)",
+  "provenance": "ESAOpenSR benchmark reference (Aybar et al., 2024)",
+  "citation": "Aybar et al. (2024), OpenSR-Test",
+  "domain_tag": "Scientific Validation Lab (ESAOpenSR)"
+}

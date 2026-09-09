@@ -1,0 +1,12 @@
+{
+  "features": [
+    "mae_consistency",
+    "rmse_consistency",
+    "spectral_angle_deg",
+    "ndvi_drift",
+    "gradient_delta",
+    "variance_delta",
+    "laplacian_energy",
+    "phase_shift_magnitude"
+  ]
+}

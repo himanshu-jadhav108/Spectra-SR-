@@ -1,0 +1,21 @@
+# Acceptance Checklist
+
+- [ ] Backend starts
+- [ ] Frontend starts
+- [ ] Health endpoint works
+- [ ] Cached scene works offline
+- [ ] SEN2SRLite model loads from verified official path
+- [ ] 10m -> 2.5m output is produced
+- [ ] GeoTIFF CRS/bounds/transform are preserved correctly
+- [ ] Raw SR artifact is saved
+- [ ] Trust metrics are computed
+- [ ] Trust map is rendered
+- [ ] Trust Head is trainable/reloadable or a deterministic fallback is clearly shown
+- [ ] Trust-gated SR is saved separately
+- [ ] Live vs benchmark evidence is visually separated
+- [ ] Benchmark mode has at least one real computed sample
+- [ ] Agriculture edge comparison works
+- [ ] Provenance is visible
+- [ ] Downloads work
+- [ ] No secrets are committed
+- [ ] No unsupported “hallucination-free” language remains

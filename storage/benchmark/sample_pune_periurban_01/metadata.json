@@ -1,0 +1,10 @@
+{
+  "dataset_name": "OpenSR-test-S2-NAIP",
+  "dataset_version": "1.0.0",
+  "sample_id": "sample_pune_periurban_01",
+  "opensr_test_version": "0.1.2",
+  "lr_gsd_m": 10.0,
+  "hr_gsd_m": 2.5,
+  "crs": "EPSG:32643",
+  "description": "Paired Sentinel-2 L2A 10 m and airborne high-resolution ground truth reference for spatial fidelity evaluation."
+}

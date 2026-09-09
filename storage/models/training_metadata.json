@@ -1,0 +1,64 @@
+{
+  "model_type": "RandomForestClassifier",
+  "version": "2.0.0-opensr-calibrated",
+  "training_source": "ESAOpenSR opensr-test (spain_crops, spain_urban, naip, spot, venus)",
+  "train_scenes": 18,
+  "test_scenes": 7,
+  "train_instances": 18432,
+  "test_instances": 7168,
+  "features": [
+    "mae_consistency",
+    "rmse_consistency",
+    "spectral_angle_deg",
+    "ndvi_drift",
+    "gradient_delta",
+    "variance_delta",
+    "laplacian_energy",
+    "phase_shift_magnitude"
+  ],
+  "feature_importances": {
+    "spectral_angle_deg": 0.2813,
+    "rmse_consistency": 0.193,
+    "phase_shift_magnitude": 0.1892,
+    "mae_consistency": 0.1508,
+    "ndvi_drift": 0.0932,
+    "variance_delta": 0.0646,
+    "laplacian_energy": 0.0164,
+    "gradient_delta": 0.0115
+  },
+  "classes": [
+    "LOW_RISK",
+    "MEDIUM_RISK",
+    "HIGH_RISK"
+  ],
+  "metrics": {
+    "accuracy": 0.6274,
+    "macro_f1": 0.5155,
+    "weighted_f1": 0.6397,
+    "macro_precision": 0.5114,
+    "macro_recall": 0.524,
+    "roc_auc_ovr": 0.7442,
+    "confusion_matrix": [
+      [
+        3416,
+        916,
+        246
+      ],
+      [
+        474,
+        706,
+        464
+      ],
+      [
+        244,
+        327,
+        375
+      ]
+    ]
+  },
+  "calibration_thresholds": {
+    "low_risk": 0.25,
+    "medium_risk": 0.5
+  },
+  "disclaimer": "Predicted reliability \u2014 not ground-truth confirmation"
+}

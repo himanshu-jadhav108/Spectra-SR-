@@ -1,0 +1,27 @@
+{
+  "dataset_name": "venus",
+  "sample_id": "venus_sample_002",
+  "index": 2,
+  "description": "CNES/ISA Ven\u00b5s microsatellite super-spectral 12-band reference",
+  "lr_shape": [
+    4,
+    128,
+    128
+  ],
+  "hr_shape": [
+    4,
+    256,
+    256
+  ],
+  "canonical_bands": [
+    "B04 (Red)",
+    "B03 (Green)",
+    "B02 (Blue)",
+    "B08 (NIR)"
+  ],
+  "lr_resolution": "10 m (Sentinel-2 L2A)",
+  "hr_resolution": "5.0 m (Ven\u00b5s L2A)",
+  "provenance": "ESAOpenSR benchmark reference (Aybar et al., 2024)",
+  "citation": "Aybar et al. (2024), OpenSR-Test",
+  "domain_tag": "Scientific Validation Lab (ESAOpenSR)"
+}
