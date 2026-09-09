@@ -1,0 +1,40 @@
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+pytest-cache-files-*
+
+# Environment variables & local secrets
+.env.local
+.env.*.local
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# OS artifacts
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+test_geotiff.tif
+test_logo.png
+test_out.tif
+
+# Runtime storage & ephemeral job artifacts
+storage/jobs/*
+!storage/jobs/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
+storage/db/*.sqlite3
+storage/db/*.sqlite3-journal
+!storage/db/.gitkeep

@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Spectra SR API
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+  /scenes/search:
+    post:
+      summary: Search Sentinel-2 scenes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SceneSearchRequest'
+      responses:
+        '200':
+          description: Scene list
+  /jobs:
+    post:
+      summary: Start processing job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreateRequest'
+      responses:
+        '202':
+          description: Job accepted
+  /jobs/{job_id}:
+    get:
+      summary: Get job state
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job state
+  /jobs/{job_id}/result:
+    get:
+      summary: Get completed result
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Result
+  /benchmark/run:
+    post:
+      summary: Start benchmark job
+      responses:
+        '202':
+          description: Job accepted
+components:
+  parameters:
+    JobId:
+      name: job_id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    SceneSearchRequest:
+      type: object
+      required: [lat, lon, start_date, end_date]
+      properties:
+        lat: {type: number}
+        lon: {type: number}
+        radius_km: {type: number, default: 10}
+        start_date: {type: string, format: date}
+        end_date: {type: string, format: date}
+        max_cloud_percent: {type: number, default: 20}
+        limit: {type: integer, default: 5}
+    JobCreateRequest:
+      type: object
+      required: [scene_id, mode, model]
+      properties:
+        scene_id: {type: string}
+        mode: {type: string, enum: [live, benchmark]}
+        model: {type: string, enum: [sen2sr_lite, ldsr_s2]}
+        enable_trust_gating: {type: boolean, default: true}
+        application: {type: string, enum: [agri_boundary]}
