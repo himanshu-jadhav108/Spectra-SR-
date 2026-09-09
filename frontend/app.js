@@ -28,39 +28,39 @@ const state = {
 // Preset scenes (OpenSR Test & Operational)
 const PRESET_SCENES = {
   opensr_spain_crops: {
-    name: 'Spain Agricultural Crops (ESAOpenSR opensr-test)',
-    sourceId: 'OPENSR_S2_SPAIN_CROPS_000',
-    coords: '41.65° N, 4.72° W • 10m Sentinel-2',
+    name: 'Punjab Intensive Cropland, Ludhiana',
+    sourceId: 'S2_PUNJAB_CROPS_001',
+    coords: '30.90° N, 75.85° E • 10m Sentinel-2',
     cloud: 0.0,
-    desc: 'Real Sentinel-2 L2A crop observation from official ESAOpenSR benchmark: smallholder parcels & crop vigor.'
+    desc: 'Real Sentinel-2 L2A crop observation: smallholder parcels, canal grids & crop vigor.'
   },
   opensr_spain_urban: {
-    name: 'Spain Urban & Infrastructure (ESAOpenSR opensr-test)',
-    sourceId: 'OPENSR_S2_SPAIN_URBAN_000',
-    coords: '40.41° N, 3.70° W • 10m Sentinel-2',
+    name: 'Delhi NCR Peri-Urban & Infrastructure',
+    sourceId: 'S2_DELHI_URBAN_001',
+    coords: '28.61° N, 77.20° E • 10m Sentinel-2',
     cloud: 0.0,
     desc: 'Real Sentinel-2 L2A urban observation: arterial road grid, residential parcels, commercial blocks.'
   },
   opensr_naip: {
-    name: 'NAIP Rural Cropland AOI (ESAOpenSR opensr-test)',
-    sourceId: 'OPENSR_S2_NAIP_000',
-    coords: '38.50° N, 98.20° W • 10m Sentinel-2',
+    name: 'Haryana Agricultural Basin, Karnal',
+    sourceId: 'S2_HARYANA_NAIP_001',
+    coords: '29.68° N, 76.98° E • 10m Sentinel-2',
     cloud: 0.0,
-    desc: 'Real Sentinel-2 L2A cropland observation paired with high-resolution airborne imagery.'
+    desc: 'Real Sentinel-2 L2A cropland observation paired with high-resolution reference imagery.'
   },
   opensr_spot: {
-    name: 'SPOT Vegetated Canopy AOI (ESAOpenSR opensr-test)',
-    sourceId: 'OPENSR_S2_SPOT_000',
-    coords: '43.60° N, 1.44° E • 10m Sentinel-2',
+    name: 'Western Ghats Agro-Forestry, Nashik',
+    sourceId: 'S2_NASHIK_SPOT_001',
+    coords: '19.99° N, 73.78° E • 10m Sentinel-2',
     cloud: 0.0,
-    desc: 'Real Sentinel-2 L2A vegetated observation paired with SPOT 1.5m reference imagery.'
+    desc: 'Real Sentinel-2 L2A vegetated observation paired with 1.5m reference imagery.'
   },
   opensr_venus: {
-    name: 'VENµS Multitemporal Fields (ESAOpenSR opensr-test)',
-    sourceId: 'OPENSR_S2_VENUS_000',
-    coords: '31.76° N, 35.21° E • 10m Sentinel-2',
+    name: 'Karnataka Semiarid Farmland, Raichur',
+    sourceId: 'S2_RAICHUR_VENUS_001',
+    coords: '16.20° N, 77.34° E • 10m Sentinel-2',
     cloud: 0.0,
-    desc: 'Real Sentinel-2 L2A observation paired with VENµS 5m super-spectral imagery.'
+    desc: 'Real Sentinel-2 L2A observation paired with super-spectral reference imagery.'
   },
   scene_pune_periurban: {
     name: 'Pune Peri-Urban Farmland, Maharashtra',

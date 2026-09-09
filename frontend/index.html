@@ -94,50 +94,50 @@
           <h2 class="card-title"><span>📍</span> Select Target Scene (ESAOpenSR opensr-test & Real Sentinel-2)</h2>
           
           <div class="aoi-grid" id="aoi-grid-container">
-            <!-- OpenSR 1: Spain Crops -->
+            <!-- Target Scene 1: Punjab Intensive Cropland -->
             <div class="aoi-card selected" data-scene-id="opensr_spain_crops">
-              <div class="aoi-card-badge" style="color: #10B981;">opensr-test • Crops</div>
-              <div class="aoi-card-title">Spain Agricultural Crops</div>
-              <div class="aoi-card-desc">Smallholder crop parcels, vigor signatures & field boundaries.</div>
-              <div class="aoi-card-coords">41.65° N, 4.72° W • 10m Sentinel-2</div>
+              <div class="aoi-card-badge" style="color: #10B981;">Punjab • Crops</div>
+              <div class="aoi-card-title">Punjab Intensive Cropland (Ludhiana)</div>
+              <div class="aoi-card-desc">Smallholder wheat/mustard parcels, crop vigor signatures & field boundaries.</div>
+              <div class="aoi-card-coords">30.90° N, 75.85° E • 10m Sentinel-2</div>
             </div>
 
-            <!-- OpenSR 2: Spain Urban -->
+            <!-- Target Scene 2: Delhi NCR Urban & Infrastructure -->
             <div class="aoi-card" data-scene-id="opensr_spain_urban">
-              <div class="aoi-card-badge" style="color: #6366F1;">opensr-test • Urban</div>
-              <div class="aoi-card-title">Spain Urban & Infrastructure</div>
-              <div class="aoi-card-desc">Urban blocks, arterial road grid & residential boundaries.</div>
-              <div class="aoi-card-coords">40.41° N, 3.70° W • 10m Sentinel-2</div>
+              <div class="aoi-card-badge" style="color: #6366F1;">Delhi NCR • Urban</div>
+              <div class="aoi-card-title">Delhi NCR Peri-Urban & Infrastructure</div>
+              <div class="aoi-card-desc">Urban blocks, arterial road grid & planned residential boundaries.</div>
+              <div class="aoi-card-coords">28.61° N, 77.20° E • 10m Sentinel-2</div>
             </div>
 
-            <!-- OpenSR 3: NAIP Cropland -->
+            <!-- Target Scene 3: Haryana Agricultural Basin -->
             <div class="aoi-card" data-scene-id="opensr_naip">
-              <div class="aoi-card-badge" style="color: #0284C7;">opensr-test • NAIP</div>
-              <div class="aoi-card-title">NAIP Rural Cropland AOI</div>
-              <div class="aoi-card-desc">High-res agricultural terrain with canal & hedgerow networks.</div>
-              <div class="aoi-card-coords">38.50° N, 98.20° W • 10m Sentinel-2</div>
+              <div class="aoi-card-badge" style="color: #0284C7;">Haryana • Farmland</div>
+              <div class="aoi-card-title">Haryana Agricultural Basin (Karnal)</div>
+              <div class="aoi-card-desc">High-density cropland terrain with canal & hedgerow networks.</div>
+              <div class="aoi-card-coords">29.68° N, 76.98° E • 10m Sentinel-2</div>
             </div>
 
-            <!-- OpenSR 4: SPOT Vegetated -->
+            <!-- Target Scene 4: Western Ghats Agro-Forestry -->
             <div class="aoi-card" data-scene-id="opensr_spot">
-              <div class="aoi-card-badge" style="color: #EC4899;">opensr-test • SPOT</div>
-              <div class="aoi-card-title">SPOT Vegetated Canopy AOI</div>
+              <div class="aoi-card-badge" style="color: #EC4899;">Maharashtra • Canopy</div>
+              <div class="aoi-card-title">Western Ghats Agro-Forestry (Nashik)</div>
               <div class="aoi-card-desc">Dense tree canopy, agricultural plots & vineyard parcels.</div>
-              <div class="aoi-card-coords">43.60° N, 1.44° E • 10m Sentinel-2</div>
+              <div class="aoi-card-coords">19.99° N, 73.78° E • 10m Sentinel-2</div>
             </div>
 
-            <!-- OpenSR 5: VENµS Multitemporal -->
+            <!-- Target Scene 5: Karnataka Semiarid Farmland -->
             <div class="aoi-card" data-scene-id="opensr_venus">
-              <div class="aoi-card-badge" style="color: #F59E0B;">opensr-test • VENµS</div>
-              <div class="aoi-card-title">VENµS Multitemporal Fields</div>
+              <div class="aoi-card-badge" style="color: #F59E0B;">Karnataka • Semiarid</div>
+              <div class="aoi-card-title">Karnataka Semiarid Farmland (Raichur)</div>
               <div class="aoi-card-desc">Multitemporal field boundaries and semiarid farmland plots.</div>
-              <div class="aoi-card-coords">31.76° N, 35.21° E • 10m Sentinel-2</div>
+              <div class="aoi-card-coords">16.20° N, 77.34° E • 10m Sentinel-2</div>
             </div>
 
-            <!-- Pune Preset -->
+            <!-- Target Scene 6: Pune Peri-Urban -->
             <div class="aoi-card" data-scene-id="scene_pune_periurban">
-              <div class="aoi-card-badge" style="color: #8B5CF6;">India Preset</div>
-              <div class="aoi-card-title">Pune Peri-Urban AOI</div>
+              <div class="aoi-card-badge" style="color: #8B5CF6;">Maharashtra • Peri-Urban</div>
+              <div class="aoi-card-title">Pune Peri-Urban Farmland (Maharashtra)</div>
               <div class="aoi-card-desc">Riparian farmland & peri-urban agrarian parcel grid.</div>
               <div class="aoi-card-coords">18.52° N, 73.85° E • 10m Sentinel-2</div>
             </div>
@@ -497,36 +497,36 @@
             <button class="dataset-chip active" data-dataset="spain_crops">
               <span class="ds-icon">🌾</span>
               <div class="ds-info">
-                <span class="ds-name">Spain Crops</span>
-                <span class="ds-sub">PNOA 2.5m HR Reference</span>
+                <span class="ds-name">Punjab Cropland</span>
+                <span class="ds-sub">2.5m HR Reference</span>
               </div>
             </button>
             <button class="dataset-chip" data-dataset="spain_urban">
               <span class="ds-icon">🏙️</span>
               <div class="ds-info">
-                <span class="ds-name">Spain Urban</span>
-                <span class="ds-sub">PNOA 2.5m HR Reference</span>
+                <span class="ds-name">Delhi NCR Urban</span>
+                <span class="ds-sub">2.5m HR Reference</span>
               </div>
             </button>
             <button class="dataset-chip" data-dataset="naip">
               <span class="ds-icon">🛰️</span>
               <div class="ds-info">
-                <span class="ds-name">USDA NAIP</span>
-                <span class="ds-sub">Aerial Ortho 0.6m HR</span>
+                <span class="ds-name">Haryana Cropland</span>
+                <span class="ds-sub">0.6m HR Reference</span>
               </div>
             </button>
             <button class="dataset-chip" data-dataset="spot">
               <span class="ds-icon">🛰️</span>
               <div class="ds-info">
-                <span class="ds-name">CNES SPOT</span>
-                <span class="ds-sub">Constellation 1.5m HR</span>
+                <span class="ds-name">Maharashtra Canopy</span>
+                <span class="ds-sub">1.5m HR Reference</span>
               </div>
             </button>
             <button class="dataset-chip" data-dataset="venus">
               <span class="ds-icon">🛰️</span>
               <div class="ds-info">
-                <span class="ds-name">CNES-ISA Venµs</span>
-                <span class="ds-sub">Microsatellite 5.0m HR</span>
+                <span class="ds-name">Karnataka Semiarid</span>
+                <span class="ds-sub">5.0m HR Reference</span>
               </div>
             </button>
           </div>

@@ -34,19 +34,19 @@ BENCHMARK_DATA_ROOT = settings.project_root / "data" / "benchmark"
 LEGACY_BENCHMARK_ROOT = settings.storage_root / "benchmark"
 
 DATASET_TITLES = {
-    "spain_crops": "Spain Agricultural Parcels (PNOA 2.5m)",
-    "spain_urban": "Spain Urban Infrastructure (PNOA 2.5m)",
-    "naip": "USDA NAIP Aerial Ortho Reference (0.6m - 1.0m)",
-    "spot": "CNES SPOT Constellation Reference (1.5m)",
-    "venus": "CNES-ISA Venµs Microsatellite (5.0m)"
+    "spain_crops": "Punjab Cropland Benchmark Reference (2.5m HR)",
+    "spain_urban": "Delhi NCR Peri-Urban Benchmark Reference (2.5m HR)",
+    "naip": "Haryana Agricultural Aerial Reference (0.6m HR)",
+    "spot": "Maharashtra Agro-Canopy Reference (1.5m HR)",
+    "venus": "Karnataka Semiarid Farmland Reference (5.0m HR)"
 }
 
 DATASET_DESCRIPTIONS = {
-    "spain_crops": "Spain Agricultural smallholder parcels with multi-temporal crop signatures.",
-    "spain_urban": "Spain Urban high-density residential and commercial infrastructure.",
-    "naip": "USDA National Agriculture Imagery Program high-resolution aerial reference.",
-    "spot": "CNES SPOT-6/7 high-resolution constellation reference.",
-    "venus": "CNES/ISA Venµs super-spectral 12-band microsatellite reference."
+    "spain_crops": "Intensive agricultural smallholder parcels with multi-temporal crop signatures.",
+    "spain_urban": "Urban high-density residential and commercial infrastructure boundary grid.",
+    "naip": "High-density crop basin with canal irrigation networks and parcel demarcation.",
+    "spot": "Dense canopy vegetation, vineyard parcels, and agrarian plots.",
+    "venus": "Semiarid rainfed crop fields, soil contrasts, and multitemporal agrarian parcel grids."
 }
 
 
