@@ -413,6 +413,9 @@ function renderAnalysisWorkspace(data) {
   if (imgLR) imgLR.src = artifacts.preview_lr;
   if (imgSR) imgSR.src = artifacts.preview_safe_sr; // default to safe_sr
   if (imgRisk) imgRisk.src = artifacts.preview_risk_map;
+  if (window.setAnalysisSliderPosition) {
+    window.setAnalysisSliderPosition(state.sliderPos || 50);
+  }
   
   // Update Scorecard
   const sd = trust_scorecard.spectral_drift;
@@ -479,31 +482,30 @@ function initSplitSlider() {
   const imgLR = document.getElementById('img-split-lr');
   const imgRisk = document.getElementById('img-risk-overlay');
   const divider = document.getElementById('split-divider');
-  const handle = document.getElementById('split-handle');
   if (!container || !imgLR || !divider) return;
   
-  function updateSlider(clientX) {
-    const rect = container.getBoundingClientRect();
-    if (rect.width === 0) return;
-    let pos = ((clientX - rect.left) / rect.width) * 100;
+  function setSliderPosition(pos) {
     pos = Math.max(1, Math.min(99, pos));
     state.sliderPos = pos;
-    
-    // Update container variable
     container.style.setProperty('--split-pos', `${pos}%`);
-    
-    // Inline clip-path for instant GPU rendering and cross-browser resilience
     imgLR.style.clipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
     imgLR.style.webkitClipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
-    
     if (imgRisk) {
       imgRisk.style.clipPath = `polygon(${pos}% 0, 100% 0, 100% 100%, ${pos}% 100%)`;
       imgRisk.style.webkitClipPath = `polygon(${pos}% 0, 100% 0, 100% 100%, ${pos}% 100%)`;
     }
-    
     divider.style.left = `${pos}%`;
   }
-  
+
+  function updateSliderFromEvent(e) {
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+    if (clientX === undefined) return;
+    const pos = ((clientX - rect.left) / rect.width) * 100;
+    setSliderPosition(pos);
+  }
+
   function onPointerDown(e) {
     state.isDraggingSlider = true;
     try {
@@ -511,30 +513,32 @@ function initSplitSlider() {
         container.setPointerCapture(e.pointerId);
       }
     } catch (_) {}
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    updateSlider(clientX);
-    if (e.cancelable && e.type === 'touchstart') e.preventDefault();
+    updateSliderFromEvent(e);
+    if (e.cancelable) e.preventDefault();
   }
-  
+
   function onPointerMove(e) {
     if (!state.isDraggingSlider) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    updateSlider(clientX);
-    if (e.cancelable && e.type === 'touchmove') e.preventDefault();
+    updateSliderFromEvent(e);
+    if (e.cancelable) e.preventDefault();
   }
-  
+
   function onPointerUp(e) {
+    if (!state.isDraggingSlider) return;
     state.isDraggingSlider = false;
     try {
-      if (e && e.pointerId && container.releasePointerCapture) {
+      if (e && e.pointerId && container.hasPointerCapture && container.hasPointerCapture(e.pointerId)) {
         container.releasePointerCapture(e.pointerId);
       }
     } catch (_) {}
   }
-  
+
   if (window.PointerEvent) {
     container.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointermove', onPointerMove, { passive: false });
+    container.addEventListener('pointerup', onPointerUp);
+    container.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
   } else {
@@ -544,7 +548,11 @@ function initSplitSlider() {
     container.addEventListener('touchstart', onPointerDown, { passive: false });
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('touchend', onPointerUp);
+    window.addEventListener('touchcancel', onPointerUp);
   }
+
+  window.setAnalysisSliderPosition = setSliderPosition;
+  setSliderPosition(state.sliderPos || 50);
 }
 
 // Layer Switcher
@@ -616,6 +624,9 @@ function initValidationLab() {
       state.benchmarkViewMode = 'slider';
       if (gridContainer) gridContainer.style.display = 'none';
       if (sliderContainer) sliderContainer.style.display = 'flex';
+      if (window.setBenchSliderPosition) {
+        window.setBenchSliderPosition(state.benchSliderPos || 50);
+      }
     });
   }
 
@@ -805,6 +816,9 @@ async function runValidationBenchmark() {
     const imgSplitOver = document.getElementById('bench-split-over');
     if (imgSplitUnder) imgSplitUnder.src = data.artifacts.hr_preview;
     if (imgSplitOver) imgSplitOver.src = data.artifacts.sr_preview;
+    if (window.setBenchSliderPosition) {
+      window.setBenchSliderPosition(state.benchSliderPos || 50);
+    }
 
     // 3. Update Top Metric Cards
     const m = data.metrics;
@@ -898,27 +912,27 @@ async function runValidationBenchmark() {
 function initBenchSplitSlider() {
   const viewer = document.getElementById('bench-split-viewer');
   const over = document.getElementById('bench-split-over');
-  const clipper = document.getElementById('bench-split-clipper');
   const divider = document.getElementById('bench-split-divider');
   if (!viewer || !divider) return;
 
-  function updateSlider(clientX) {
-    const rect = viewer.getBoundingClientRect();
-    if (rect.width === 0) return;
-    let pos = ((clientX - rect.left) / rect.width) * 100;
+  function setBenchSliderPosition(pos) {
     pos = Math.max(1, Math.min(99, pos));
     state.benchSliderPos = pos;
     viewer.style.setProperty('--bench-pos', `${pos}%`);
-    
-    // Support responsive clip-path for perfectly aligned rendering at any viewport width
     if (over) {
       over.style.clipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
       over.style.webkitClipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
     }
-    if (clipper) {
-      clipper.style.width = `${pos}%`;
-    }
     divider.style.left = `${pos}%`;
+  }
+
+  function updateSliderFromEvent(e) {
+    const rect = viewer.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+    if (clientX === undefined) return;
+    const pos = ((clientX - rect.left) / rect.width) * 100;
+    setBenchSliderPosition(pos);
   }
 
   function onPointerDown(e) {
@@ -928,22 +942,21 @@ function initBenchSplitSlider() {
         viewer.setPointerCapture(e.pointerId);
       }
     } catch (_) {}
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    updateSlider(clientX);
-    if (e.cancelable && e.type === 'touchstart') e.preventDefault();
+    updateSliderFromEvent(e);
+    if (e.cancelable) e.preventDefault();
   }
 
   function onPointerMove(e) {
     if (!state.isDraggingBenchSlider) return;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    updateSlider(clientX);
-    if (e.cancelable && e.type === 'touchmove') e.preventDefault();
+    updateSliderFromEvent(e);
+    if (e.cancelable) e.preventDefault();
   }
 
   function onPointerUp(e) {
+    if (!state.isDraggingBenchSlider) return;
     state.isDraggingBenchSlider = false;
     try {
-      if (e && e.pointerId && viewer.releasePointerCapture) {
+      if (e && e.pointerId && viewer.hasPointerCapture && viewer.hasPointerCapture(e.pointerId)) {
         viewer.releasePointerCapture(e.pointerId);
       }
     } catch (_) {}
@@ -951,7 +964,10 @@ function initBenchSplitSlider() {
 
   if (window.PointerEvent) {
     viewer.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('pointermove', onPointerMove);
+    viewer.addEventListener('pointermove', onPointerMove, { passive: false });
+    viewer.addEventListener('pointerup', onPointerUp);
+    viewer.addEventListener('pointercancel', onPointerUp);
+    window.addEventListener('pointermove', onPointerMove, { passive: false });
     window.addEventListener('pointerup', onPointerUp);
     window.addEventListener('pointercancel', onPointerUp);
   } else {
@@ -961,6 +977,10 @@ function initBenchSplitSlider() {
     viewer.addEventListener('touchstart', onPointerDown, { passive: false });
     window.addEventListener('touchmove', onPointerMove, { passive: false });
     window.addEventListener('touchend', onPointerUp);
+    window.addEventListener('touchcancel', onPointerUp);
   }
+
+  window.setBenchSliderPosition = setBenchSliderPosition;
+  setBenchSliderPosition(state.benchSliderPos || 50);
 }
 

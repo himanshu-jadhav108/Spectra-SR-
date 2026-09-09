@@ -326,13 +326,13 @@
           <!-- Split Slider Container -->
           <div class="split-viewer-container" id="split-container">
             <!-- 2.5 m Super-Resolution (Base layer underneath) -->
-            <img id="img-split-sr" class="split-img split-img-sr" alt="2.5 m Super-Resolution">
+            <img id="img-split-sr" class="split-img split-img-sr" alt="2.5 m Super-Resolution" draggable="false">
 
             <!-- Semi-transparent Risk Heatmap Layer -->
-            <img id="img-risk-overlay" class="risk-overlay-layer" alt="Predicted Risk Heatmap">
+            <img id="img-risk-overlay" class="risk-overlay-layer" alt="Predicted Risk Heatmap" draggable="false">
 
             <!-- 10 m Observed Sentinel-2 LR (On top, clipped to left) -->
-            <img id="img-split-lr" class="split-img split-img-lr" alt="10 m Sentinel-2 LR">
+            <img id="img-split-lr" class="split-img split-img-lr" alt="10 m Sentinel-2 LR" draggable="false">
 
             <!-- Draggable Divider Line & Handle -->
             <div class="split-divider-line" id="split-divider">
@@ -599,13 +599,15 @@
           <!-- Interactive Split Slider View (Hidden by default, toggled via mode buttons) -->
           <div class="bench-slider-container" id="bench-slider-container" style="display: none;">
             <div class="bench-split-viewer" id="bench-split-viewer">
-              <img id="bench-split-under" class="bench-split-img under" alt="Ground Truth HR">
-              <div class="bench-split-clipper" id="bench-split-clipper">
-                <img id="bench-split-over" class="bench-split-img over" alt="Spectra SR">
-              </div>
+              <!-- Ground Truth HR (Base layer underneath / right side) -->
+              <img id="bench-split-under" class="bench-split-img under" alt="Ground Truth HR Reference" draggable="false">
+              <!-- Spectra SR 2.5m (On top, clipped to left) -->
+              <img id="bench-split-over" class="bench-split-img over" alt="Spectra SR (2.5 m)" draggable="false">
+              <!-- Draggable Divider Line & Handle -->
               <div class="bench-split-divider" id="bench-split-divider">
-                <div class="bench-split-handle">↔</div>
+                <div class="bench-split-handle" id="bench-split-handle">◀ ▶</div>
               </div>
+              <!-- Floating Resolution Labels -->
               <div class="bench-split-label left">Spectra SR (2.5 m)</div>
               <div class="bench-split-label right">HR Ground Truth Reference</div>
             </div>

@@ -1389,20 +1389,23 @@ body {
 .bench-slider-container {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  align-items: center;
+  width: 100%;
 }
 
 .bench-split-viewer {
   position: relative;
   width: 100%;
-  max-width: 760px;
+  max-width: 620px;
   aspect-ratio: 1 / 1;
   margin: 0 auto;
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   cursor: ew-resize;
   user-select: none;
+  -webkit-user-select: none;
   border: 1px solid var(--border-color);
   background-color: #0F172A;
   touch-action: none;
@@ -1415,7 +1418,14 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
   pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.bench-split-img.under {
+  z-index: 1;
 }
 
 .bench-split-img.over {
@@ -1424,20 +1434,23 @@ body {
   -webkit-clip-path: polygon(0 0, var(--bench-pos, 50%) 0, var(--bench-pos, 50%) 100%, 0 100%);
 }
 
+/* Backward-compatibility fallback if any cached DOM retains wrapper */
 .bench-split-clipper {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible;
   pointer-events: none;
   z-index: 2;
 }
 
 .bench-split-clipper .bench-split-img {
-  width: 100%;
-  max-width: 100%;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none;
+  object-fit: cover;
 }
 
 .bench-split-divider {
@@ -1445,9 +1458,9 @@ body {
   top: 0;
   bottom: 0;
   left: var(--bench-pos, 50%);
-  width: 3px;
+  width: 2px;
   background-color: #FFFFFF;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 10;
@@ -1458,19 +1471,32 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background-color: #FFFFFF;
-  color: #1E293B;
-  border: 2px solid #4F46E5;
+  color: var(--primary);
+  border: 2px solid var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
   font-weight: 800;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  letter-spacing: -1px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  cursor: ew-resize;
+  pointer-events: auto;
   touch-action: none;
+  z-index: 11;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.bench-split-handle:hover,
+.bench-split-handle:active {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
 }
 
 .bench-split-label {
@@ -1480,10 +1506,12 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   border-radius: 4px;
-  background-color: rgba(15, 23, 42, 0.8);
+  background-color: rgba(15, 23, 42, 0.85);
   color: #FFFFFF;
   backdrop-filter: blur(4px);
   pointer-events: none;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .bench-split-label.left { left: 12px; }
@@ -2045,19 +2073,22 @@ body {
     font-size: 0.72rem;
   }
 
-  .split-viewer-container {
+  .split-viewer-container,
+  .bench-split-viewer {
     max-width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: var(--radius-sm);
   }
 
-  .split-handle {
-    width: 40px;
-    height: 40px;
+  .split-handle,
+  .bench-split-handle {
+    width: 38px;
+    height: 38px;
     font-size: 0.75rem;
   }
 
-  .slider-label {
+  .slider-label,
+  .bench-split-label {
     font-size: 0.65rem;
     padding: 0.25rem 0.5rem;
     bottom: 0.6rem;
