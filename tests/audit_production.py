@@ -36,7 +36,9 @@ def run_audit():
         assert r.status_code == 200
         assert "Spectra SR" in r.text
         assert "Mission Console" in r.text
-        print(f"[{total}] PASS: / (HTML Index) -> Content-Type: {r.headers.get('content-type')}, {len(r.content)} bytes")
+        r_idx = client.get("/index.html")
+        assert r_idx.status_code == 200
+        print(f"[{total}] PASS: / and /index.html -> Content-Type: {r.headers.get('content-type')}, {len(r.content)} bytes")
         passed += 1
 
         # 3. CSS Stylesheet (Mobile responsive rules)
@@ -65,13 +67,16 @@ def run_audit():
         print(f"[{total}] PASS: /brand/spectra-sr-logo.png -> Clean PNG asset delivered ({len(r.content)} bytes)")
         passed += 1
 
-        # 6. Scene Discovery
+        # 6. Scene Discovery & Previews
         total += 1
         r = client.get("/api/v1/scenes")
         assert r.status_code == 200
         scenes = r.json()
         assert len(scenes) >= 6, f"Expected at least 6 scenes, found {len(scenes)}"
-        print(f"[{total}] PASS: /api/v1/scenes -> Found {len(scenes)} target demonstration scenes")
+        r_pune = client.get("/api/v1/scenes/scene_pune_periurban/preview")
+        assert r_pune.status_code == 200
+        assert r_pune.headers["content-type"] == "image/png"
+        print(f"[{total}] PASS: /api/v1/scenes -> Found {len(scenes)} scenes; Pune Peri-Urban preview verified ({len(r_pune.content)} bytes)")
         passed += 1
 
         # 7. Scene Upload (Custom User GeoTIFF / Image)

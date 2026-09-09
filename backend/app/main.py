@@ -66,6 +66,11 @@ brand_dir = settings.project_root / "frontend" / "public" / "brand"
 if brand_dir.exists():
     app.mount("/brand", StaticFiles(directory=str(brand_dir)), name="brand")
 
+# Mount Public Assets if exists
+public_dir = settings.project_root / "frontend" / "public"
+if public_dir.exists():
+    app.mount("/public", StaticFiles(directory=str(public_dir)), name="public")
+
 # Mount Frontend Static/Dist if exists
 frontend_dist = settings.project_root / "frontend" / "dist"
 if frontend_dist.exists():
@@ -89,6 +94,7 @@ def favicon():
     return Response(status_code=204)
 
 @app.get("/")
+@app.get("/index.html")
 def index():
     # If dist index.html exists, serve it; otherwise serve frontend/index.html
     dist_index = settings.project_root / "frontend" / "dist" / "index.html"
