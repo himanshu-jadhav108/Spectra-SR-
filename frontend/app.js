@@ -506,27 +506,45 @@ function initSplitSlider() {
   
   function onPointerDown(e) {
     state.isDraggingSlider = true;
+    try {
+      if (e.pointerId && container.setPointerCapture) {
+        container.setPointerCapture(e.pointerId);
+      }
+    } catch (_) {}
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     updateSlider(clientX);
+    if (e.cancelable && e.type === 'touchstart') e.preventDefault();
   }
   
   function onPointerMove(e) {
     if (!state.isDraggingSlider) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     updateSlider(clientX);
+    if (e.cancelable && e.type === 'touchmove') e.preventDefault();
   }
   
-  function onPointerUp() {
+  function onPointerUp(e) {
     state.isDraggingSlider = false;
+    try {
+      if (e && e.pointerId && container.releasePointerCapture) {
+        container.releasePointerCapture(e.pointerId);
+      }
+    } catch (_) {}
   }
   
-  container.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-  
-  container.addEventListener('touchstart', onPointerDown, { passive: true });
-  window.addEventListener('touchmove', onPointerMove, { passive: true });
-  window.addEventListener('touchend', onPointerUp);
+  if (window.PointerEvent) {
+    container.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  } else {
+    container.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+    container.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+  }
 }
 
 // Layer Switcher
@@ -885,41 +903,70 @@ async function runValidationBenchmark() {
 // Bench Split Slider Dragging Interaction
 function initBenchSplitSlider() {
   const viewer = document.getElementById('bench-split-viewer');
+  const over = document.getElementById('bench-split-over');
   const clipper = document.getElementById('bench-split-clipper');
   const divider = document.getElementById('bench-split-divider');
-  if (!viewer || !clipper || !divider) return;
+  if (!viewer || !divider) return;
 
   function updateSlider(clientX) {
     const rect = viewer.getBoundingClientRect();
+    if (rect.width === 0) return;
     let pos = ((clientX - rect.left) / rect.width) * 100;
-    pos = Math.max(0, Math.min(100, pos));
+    pos = Math.max(1, Math.min(99, pos));
     state.benchSliderPos = pos;
-    clipper.style.width = `${pos}%`;
+    viewer.style.setProperty('--bench-pos', `${pos}%`);
+    
+    // Support responsive clip-path for perfectly aligned rendering at any viewport width
+    if (over) {
+      over.style.clipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
+      over.style.webkitClipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
+    }
+    if (clipper) {
+      clipper.style.width = `${pos}%`;
+    }
     divider.style.left = `${pos}%`;
   }
 
   function onPointerDown(e) {
     state.isDraggingBenchSlider = true;
+    try {
+      if (e.pointerId && viewer.setPointerCapture) {
+        viewer.setPointerCapture(e.pointerId);
+      }
+    } catch (_) {}
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     updateSlider(clientX);
+    if (e.cancelable && e.type === 'touchstart') e.preventDefault();
   }
 
   function onPointerMove(e) {
     if (!state.isDraggingBenchSlider) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     updateSlider(clientX);
+    if (e.cancelable && e.type === 'touchmove') e.preventDefault();
   }
 
-  function onPointerUp() {
+  function onPointerUp(e) {
     state.isDraggingBenchSlider = false;
+    try {
+      if (e && e.pointerId && viewer.releasePointerCapture) {
+        viewer.releasePointerCapture(e.pointerId);
+      }
+    } catch (_) {}
   }
 
-  viewer.addEventListener('mousedown', onPointerDown);
-  window.addEventListener('mousemove', onPointerMove);
-  window.addEventListener('mouseup', onPointerUp);
-
-  viewer.addEventListener('touchstart', onPointerDown, { passive: true });
-  window.addEventListener('touchmove', onPointerMove, { passive: true });
-  window.addEventListener('touchend', onPointerUp);
+  if (window.PointerEvent) {
+    viewer.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  } else {
+    viewer.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+    viewer.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp);
+  }
 }
 

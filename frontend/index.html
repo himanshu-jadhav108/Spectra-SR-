@@ -45,7 +45,7 @@
     <div class="header-meta">
       <div class="gpu-badge">
         <span class="gpu-dot"></span>
-        <span>GPU Acceleration (RTX 4060)</span>
+        <span class="gpu-text">GPU Acceleration (RTX 4060)</span>
       </div>
     </div>
   </header>
@@ -660,42 +660,44 @@
           <!-- Column 1: Detailed ESAOpenSR Protocol Metrics -->
           <div class="card">
             <h2 class="card-title"><span>📊</span> ESAOpenSR Protocol Fidelity Metrics</h2>
-            <table class="bench-metrics-table">
-              <thead>
-                <tr>
-                  <th>Fidelity Dimension</th>
-                  <th>Scientific Definition</th>
-                  <th>Benchmark Value</th>
-                  <th>Evaluation</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Physical Reflectance RMSE</strong></td>
-                  <td>Root-mean-squared error against true physical reflectance</td>
-                  <td id="bm-rmse">0.0182</td>
-                  <td><span class="status-pill status-good">EXCELLENT (&lt;0.05)</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Spectral Angle Distance</strong></td>
-                  <td>Mean spectral vector deviation against ground truth spectra</td>
-                  <td id="bm-sad">2.14°</td>
-                  <td><span class="status-pill status-good">PRESERVED (&lt;4.0°)</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Spatial Edge Correlation</strong></td>
-                  <td>Sobel gradient cross-correlation between SR and HR</td>
-                  <td id="bm-spatial">0.942</td>
-                  <td><span class="status-pill status-good">STRONGLY ALIGNED</span></td>
-                </tr>
-                <tr>
-                  <td><strong>Ground Sampling Distance (GSD)</strong></td>
-                  <td>Low-Res Input vs Super-Resolved Output vs Reference GSD</td>
-                  <td id="bm-gsd">10.0m → 2.5m (Ref: 2.5m)</td>
-                  <td><span class="status-pill status-good">VERIFIED 4×</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="bench-metrics-table">
+                <thead>
+                  <tr>
+                    <th>Fidelity Dimension</th>
+                    <th>Scientific Definition</th>
+                    <th>Benchmark Value</th>
+                    <th>Evaluation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Physical Reflectance RMSE</strong></td>
+                    <td>Root-mean-squared error against true physical reflectance</td>
+                    <td id="bm-rmse">0.0182</td>
+                    <td><span class="status-pill status-good">EXCELLENT (&lt;0.05)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Spectral Angle Distance</strong></td>
+                    <td>Mean spectral vector deviation against ground truth spectra</td>
+                    <td id="bm-sad">2.14°</td>
+                    <td><span class="status-pill status-good">PRESERVED (&lt;4.0°)</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Spatial Edge Correlation</strong></td>
+                    <td>Sobel gradient cross-correlation between SR and HR</td>
+                    <td id="bm-spatial">0.942</td>
+                    <td><span class="status-pill status-good">STRONGLY ALIGNED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Ground Sampling Distance (GSD)</strong></td>
+                    <td>Low-Res Input vs Super-Resolved Output vs Reference GSD</td>
+                    <td id="bm-gsd">10.0m → 2.5m (Ref: 2.5m)</td>
+                    <td><span class="status-pill status-good">VERIFIED 4×</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             <div class="engine-attribution-note" id="engine-attribution-note">
               <span>⚡</span> Engine: <code>ESAOpenSR opensr-test v1.3.3 PyTorch Engine</code> • Metric Suite: <code>OpenSR.Metrics</code>
