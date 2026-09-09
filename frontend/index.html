@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectra SR — Satellite Super-Resolution & Trust Engine</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Light Top Header -->
+  <header class="app-header">
+    <div class="brand-wrapper">
+      <!-- Spectra SR Logo on clean light background, no dark badge, natural aspect ratio -->
+      <img src="/brand/spectra-sr-logo.png" alt="Spectra SR Logo" class="brand-logo-img">
+      <div class="brand-info">
+        <div class="brand-title-row">
+          <span class="brand-title">Spectra SR</span>
+          <span class="badge-sih">SIH 2026 PS 26142</span>
+        </div>
+        <span class="brand-tagline">10 m Sentinel-2 → 2.5 m Super-Resolution + Trust Engine</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-btn active" data-view="console">
+        <span>🛰️</span> Mission Console
+      </button>
+      <button class="nav-btn" data-view="processing">
+        <span>⚡</span> Pipeline Monitor
+      </button>
+      <button class="nav-btn" data-view="analysis">
+        <span>🔬</span> Analysis Workspace
+      </button>
+      <button class="nav-btn" data-view="benchmark" id="nav-btn-lab">
+        <span>🔬</span> Validation Lab <span class="badge-lab">ESAOpenSR</span>
+      </button>
+    </nav>
+
+    <!-- Header Meta & GPU Indicator -->
+    <div class="header-meta">
+      <div class="gpu-badge">
+        <span class="gpu-dot"></span>
+        <span>GPU Acceleration (RTX 4060)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Body -->
+  <main class="main-container">
+
+    <!-- Screen 1: Mission Console -->
+    <section id="view-console" class="view-section active">
+      <div class="hero-card">
+        <div class="hero-text">
+          <h1>Satellite Super-Resolution Mission Console</h1>
+          <p>
+            Transform Sentinel-2 10 m RGB+NIR multi-spectral bands into 2.5 m super-resolved imagery
+            with integrated Trust Engine reliability verification, conservative Trust-Gating, and agricultural field boundary clarity.
+          </p>
+          <div class="hero-chips">
+            <span class="chip">Native 4× Upsampling</span>
+            <span class="chip">Radiometric & Spectral Preservation</span>
+            <span class="chip">Conservative Trust-Gated Blending</span>
+            <span class="chip">CRS Georeferencing Preserved</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="console-grid">
+          <!-- Upload Satellite Imagery Dropzone -->
+          <div class="upload-dropzone" id="dropzone-upload">
+            <input type="file" id="input-satellite-file" accept=".tif,.tiff,.png,.jpg,.jpeg" style="display: none;">
+            <div class="upload-icon">📤</div>
+            <div class="upload-title">Upload Custom Satellite Image / GeoTIFF</div>
+            <div class="upload-sub">Drag & drop your Sentinel-2 crop or click to browse (.tif, .tiff, .png, .jpg)</div>
+            <span class="upload-btn-fake">Browse Satellite Image</span>
+          </div>
+
+          <!-- Upload Status & Preview Card -->
+          <div class="upload-preview-card" id="upload-preview-container">
+            <img id="upload-preview-img" class="upload-preview-thumb" alt="Uploaded Satellite Preview">
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: #166534;" id="upload-filename">custom_sentinel2.png</div>
+              <div style="font-size: 0.75rem; color: #15803D;">Ready for 4× Super-Resolution • Radiometric scaling applied</div>
+            </div>
+            <span class="status-pill status-good">READY</span>
+          </div>
+
+          <h2 class="card-title"><span>📍</span> Select Target Scene (ESAOpenSR opensr-test & Real Sentinel-2)</h2>
+          
+          <div class="aoi-grid" id="aoi-grid-container">
+            <!-- OpenSR 1: Spain Crops -->
+            <div class="aoi-card selected" data-scene-id="opensr_spain_crops">
+              <div class="aoi-card-badge" style="color: #10B981;">opensr-test • Crops</div>
+              <div class="aoi-card-title">Spain Agricultural Crops</div>
+              <div class="aoi-card-desc">Smallholder crop parcels, vigor signatures & field boundaries.</div>
+              <div class="aoi-card-coords">41.65° N, 4.72° W • 10m Sentinel-2</div>
+            </div>
+
+            <!-- OpenSR 2: Spain Urban -->
+            <div class="aoi-card" data-scene-id="opensr_spain_urban">
+              <div class="aoi-card-badge" style="color: #6366F1;">opensr-test • Urban</div>
+              <div class="aoi-card-title">Spain Urban & Infrastructure</div>
+              <div class="aoi-card-desc">Urban blocks, arterial road grid & residential boundaries.</div>
+              <div class="aoi-card-coords">40.41° N, 3.70° W • 10m Sentinel-2</div>
+            </div>
+
+            <!-- OpenSR 3: NAIP Cropland -->
+            <div class="aoi-card" data-scene-id="opensr_naip">
+              <div class="aoi-card-badge" style="color: #0284C7;">opensr-test • NAIP</div>
+              <div class="aoi-card-title">NAIP Rural Cropland AOI</div>
+              <div class="aoi-card-desc">High-res agricultural terrain with canal & hedgerow networks.</div>
+              <div class="aoi-card-coords">38.50° N, 98.20° W • 10m Sentinel-2</div>
+            </div>
+
+            <!-- OpenSR 4: SPOT Vegetated -->
+            <div class="aoi-card" data-scene-id="opensr_spot">
+              <div class="aoi-card-badge" style="color: #EC4899;">opensr-test • SPOT</div>
+              <div class="aoi-card-title">SPOT Vegetated Canopy AOI</div>
+              <div class="aoi-card-desc">Dense tree canopy, agricultural plots & vineyard parcels.</div>
+              <div class="aoi-card-coords">43.60° N, 1.44° E • 10m Sentinel-2</div>
+            </div>
+
+            <!-- OpenSR 5: VENµS Multitemporal -->
+            <div class="aoi-card" data-scene-id="opensr_venus">
+              <div class="aoi-card-badge" style="color: #F59E0B;">opensr-test • VENµS</div>
+              <div class="aoi-card-title">VENµS Multitemporal Fields</div>
+              <div class="aoi-card-desc">Multitemporal field boundaries and semiarid farmland plots.</div>
+              <div class="aoi-card-coords">31.76° N, 35.21° E • 10m Sentinel-2</div>
+            </div>
+
+            <!-- Pune Preset -->
+            <div class="aoi-card" data-scene-id="scene_pune_periurban">
+              <div class="aoi-card-badge" style="color: #8B5CF6;">India Preset</div>
+              <div class="aoi-card-title">Pune Peri-Urban AOI</div>
+              <div class="aoi-card-desc">Riparian farmland & peri-urban agrarian parcel grid.</div>
+              <div class="aoi-card-coords">18.52° N, 73.85° E • 10m Sentinel-2</div>
+            </div>
+          </div>
+
+          <form id="pipeline-form">
+            <input type="hidden" id="input-scene-id" value="opensr_spain_crops">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Data Provider Source</label>
+                <select class="form-select" id="select-provider">
+                  <option value="local">Local Demonstration Cache (100% Offline Ready)</option>
+                  <option value="copernicus_cdse">Copernicus Data Space (CDSE STAC 1.1)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Super-Resolution Model Architecture</label>
+                <select class="form-select" id="select-model">
+                  <option value="sen2sr_lite">SEN2SRLite (Official 4× to 2.5 m GSD)</option>
+                  <option value="ldsr_s2">LDSR-S2 (Latent Diffusion - Experimental)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Date Range Filter</label>
+                <input type="text" class="form-input" value="2026-01-01 to 2026-03-01" readonly>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Max Cloud Cover Threshold: <strong id="cloud-value-display">2.1%</strong></label>
+                <input type="range" class="form-input" min="0" max="50" value="20" style="padding: 0.2rem 0;">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 0.5rem;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="check-trust-gating" checked>
+                <span>
+                  <strong>Enable Conservative Trust-Gating:</strong> <code>safe_sr = base + confidence * (raw_sr - base)</code>
+                  <br><small style="color: var(--text-muted)">Blends inferred detail back toward observed source baseline in regions of high predicted risk.</small>
+                </span>
+              </label>
+
+              <label class="checkbox-label">
+                <input type="checkbox" id="check-agri-boundary" checked>
+                <span>
+                  <strong>Agricultural Field Boundary Visibility Analysis</strong>
+                  <br><small style="color: var(--text-muted)">Calculates edge sharpness gain and parcel boundary demarcation for smallholder plots.</small>
+                </span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btn-submit-pipeline">
+              <span>🚀</span> Launch Super-Resolution Pipeline (4×)
+            </button>
+          </form>
+        </div>
+
+        <!-- Right: Technical Specification Summary -->
+        <div class="card">
+          <h2 class="card-title"><span>📐</span> Specification & Pipeline</h2>
+          
+          <div style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Input Sensors:</span>
+              <div style="font-weight: 600;">Sentinel-2 L2A (B04, B03, B02, B08) @ 10 m GSD</div>
+            </div>
+
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Super-Resolved Target:</span>
+              <div style="font-weight: 600; color: var(--primary);">2.5 m GSD (4× Spatial Factor)</div>
+            </div>
+
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Trust Engine Head:</span>
+              <div style="font-weight: 600;">RandomForest Classifier (8 consistency signals)</div>
+            </div>
+
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Georeferencing:</span>
+              <div style="font-weight: 600;">EPSG:32643 • ModelPixelScale & TiePoint Preserved</div>
+            </div>
+
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.75rem;">Scientific Guardrail:</span>
+              <div style="font-size: 0.75rem; color: var(--text-secondary); background-color: var(--bg-subtle); padding: 0.5rem; border-radius: var(--radius-sm);">
+                Predicted reliability is distinct from ground-truth validation. Zero false claims of "hallucination-free" AI.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Processing Console -->
+    <section id="view-processing" class="view-section">
+      <div class="card processing-card">
+        <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--text-primary);">Super-Resolution Pipeline In Progress</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+          Executing SEN2SRLite inference and multi-spectral Trust Engine analysis.
+        </p>
+
+        <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 1.5rem; font-size: 0.85rem;">
+          <div>Job ID: <strong id="proc-job-id" style="font-family: monospace;">-</strong></div>
+          <div>Scene: <strong id="proc-scene-name">-</strong></div>
+          <div>Elapsed: <strong id="proc-elapsed-time">0.0s</strong></div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="proc-progress-fill" style="width: 10%;"></div>
+        </div>
+        <div style="text-align: right; font-size: 0.8rem; font-weight: 700; color: var(--primary);" id="proc-progress-pct">10%</div>
+
+        <!-- 8-Step Stepper -->
+        <div class="stepper-container">
+          <div class="stepper-progress-line"></div>
+
+          <div class="step-node active" id="step-node-0">
+            <div class="step-circle">1</div>
+            <div class="step-label">Discovery</div>
+          </div>
+
+          <div class="step-node" id="step-node-1">
+            <div class="step-circle">2</div>
+            <div class="step-label">Preprocess</div>
+          </div>
+
+          <div class="step-node" id="step-node-2">
+            <div class="step-circle">3</div>
+            <div class="step-label">SEN2SRLite</div>
+          </div>
+
+          <div class="step-node" id="step-node-3">
+            <div class="step-circle">4</div>
+            <div class="step-label">Trust Head</div>
+          </div>
+
+          <div class="step-node" id="step-node-4">
+            <div class="step-circle">5</div>
+            <div class="step-label">Trust-Gating</div>
+          </div>
+
+          <div class="step-node" id="step-node-5">
+            <div class="step-circle">6</div>
+            <div class="step-label">Agri Boundary</div>
+          </div>
+
+          <div class="step-node" id="step-node-6">
+            <div class="step-circle">7</div>
+            <div class="step-label">GeoTIFFs</div>
+          </div>
+
+          <div class="step-node" id="step-node-7">
+            <div class="step-circle">8</div>
+            <div class="step-label">Complete</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Analysis Workspace -->
+    <section id="view-analysis" class="view-section">
+      <div class="workspace-grid">
+
+        <!-- Left: Interactive Split Comparison Viewer -->
+        <div class="viewer-card">
+          <div class="viewer-toolbar">
+            <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">
+              Interactive Super-Resolution Comparison (10 m vs 2.5 m)
+            </div>
+
+            <!-- Layer Switcher -->
+            <div class="layer-toggles">
+              <button class="layer-btn active" data-layer="safe_sr">Trust-Gated Safe SR</button>
+              <button class="layer-btn" data-layer="raw_sr">Raw SEN2SRLite</button>
+              <button class="layer-btn" data-layer="risk_map">Risk Map Overlay</button>
+              <button class="layer-btn" data-layer="agri_boundary">Agri Boundaries</button>
+            </div>
+          </div>
+
+          <!-- Split Slider Container -->
+          <div class="split-viewer-container" id="split-container">
+            <!-- 2.5 m Super-Resolution (Base layer underneath) -->
+            <img id="img-split-sr" class="split-img split-img-sr" alt="2.5 m Super-Resolution">
+
+            <!-- Semi-transparent Risk Heatmap Layer -->
+            <img id="img-risk-overlay" class="risk-overlay-layer" alt="Predicted Risk Heatmap">
+
+            <!-- 10 m Observed Sentinel-2 LR (On top, clipped to left) -->
+            <img id="img-split-lr" class="split-img split-img-lr" alt="10 m Sentinel-2 LR">
+
+            <!-- Draggable Divider Line & Handle -->
+            <div class="split-divider-line" id="split-divider">
+              <div class="split-handle" id="split-handle">◀ ▶</div>
+            </div>
+
+            <!-- Floating Resolution Labels -->
+            <div class="slider-label slider-label-left">Observed Sentinel-2 (10 m)</div>
+            <div class="slider-label slider-label-right" id="slider-label-right">Trust-Gated Safe SR (2.5 m)</div>
+          </div>
+
+          <!-- Risk Map Legend -->
+          <div class="risk-legend-bar">
+            <span style="font-weight: 600;">Predicted Risk Legend:</span>
+            <div class="legend-item">
+              <div class="legend-swatch" style="background-color: #2E7D32;"></div>
+              <span>Low Risk (&lt;0.25)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch" style="background-color: #B7791F;"></div>
+              <span>Medium Risk (0.25-0.50)</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-swatch" style="background-color: #C62828;"></div>
+              <span>High Risk (&gt;0.50)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Trust Scorecard, Agri Utility & Downloads -->
+        <div class="sidebar-panel">
+
+          <!-- Trust Scorecard -->
+          <div class="scorecard-card">
+            <div class="scorecard-title-row">
+              <span class="scorecard-title">Trust Scorecard</span>
+              <span class="status-pill status-good" id="val-coverage">LIVE-PREDICTED</span>
+            </div>
+
+            <!-- 1. Spectral Drift -->
+            <div class="score-row">
+              <div class="score-label-wrap">
+                <span class="score-label">Spectral Angle (SAD)</span>
+                <span class="score-detail" id="val-spectral">2.45° SAD (Threshold: &lt;5.0°)</span>
+              </div>
+              <span class="status-pill status-good" id="pill-spectral">GOOD</span>
+            </div>
+
+            <!-- 2. Spatial Alignment -->
+            <div class="score-row">
+              <div class="score-label-wrap">
+                <span class="score-label">Spatial Phase Shift</span>
+                <span class="score-detail" id="val-spatial">0.12 px (Threshold: &lt;0.5 px)</span>
+              </div>
+              <span class="status-pill status-good" id="pill-spatial">GOOD</span>
+            </div>
+
+            <!-- 3. Source Consistency -->
+            <div class="score-row">
+              <div class="score-label-wrap">
+                <span class="score-label">Reconstruction RMSE</span>
+                <span class="score-detail" id="val-consistency">0.021 RMSE (Threshold: &lt;0.05)</span>
+              </div>
+              <span class="status-pill status-good" id="pill-consistency">GOOD</span>
+            </div>
+
+            <!-- 4. Predicted Risk -->
+            <div class="score-row">
+              <div class="score-label-wrap">
+                <span class="score-label">Predicted Risk Score</span>
+                <span class="score-detail" id="val-risk">Score: 0.14 (Low Risk: 92%)</span>
+              </div>
+              <span class="status-pill status-good" id="pill-risk">LOW RISK</span>
+            </div>
+
+            <!-- Mandatory Scientific Disclaimer Alert Box -->
+            <div class="disclaimer-alert">
+              <strong>Mandatory Scientific Disclaimer:</strong>
+              Predicted reliability — not ground-truth confirmation. Inferred details in high-risk zones are conservatively blended toward the observed source baseline to safeguard downstream agronomic calculations.
+            </div>
+          </div>
+
+          <!-- Agricultural Field Boundary Utility -->
+          <div class="agri-card">
+            <div class="agri-card-title">
+              <span>🌾</span> Agricultural Boundary Enhancement
+            </div>
+            <div class="agri-stat-row">
+              <span>Parcel Boundary Sharpness Gain:</span>
+              <strong id="agri-gain-val">+38.4%</strong>
+            </div>
+            <div class="agri-stat-row">
+              <span>Edge Contrast Multiplier:</span>
+              <strong id="agri-mult-val">1.48×</strong>
+            </div>
+            <div class="agri-caveat">
+              *Visual boundary enhancement for agronomic farm management only. Does not constitute legal cadastral survey or land title demarcation.
+            </div>
+          </div>
+
+          <!-- GeoTIFF & Artifact Downloads -->
+          <div class="downloads-card">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem;">
+              Export Certified GeoTIFF Artifacts
+            </div>
+            <a href="#" class="download-btn" id="btn-dl-safe">
+              <span>⬇ Trust-Gated GeoTIFF (2.5 m)</span>
+              <span style="font-size: 0.7rem; color: var(--risk-low);">Safe / Recommended</span>
+            </a>
+            <a href="#" class="download-btn" id="btn-dl-raw">
+              <span>⬇ Raw SEN2SRLite GeoTIFF (2.5 m)</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Unfiltered</span>
+            </a>
+            <a href="#" class="download-btn" id="btn-dl-risk">
+              <span>⬇ Predicted Risk Map GeoTIFF (2.5 m)</span>
+              <span style="font-size: 0.7rem; color: var(--risk-med);">Reliability Layer</span>
+            </a>
+            <a href="#" class="download-btn" id="btn-dl-metrics">
+              <span>⬇ Complete Metrics & Audit JSON</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">JSON Audit</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 4: Validation Lab (ESAOpenSR Scientific Reference Domain) -->
+    <section id="view-benchmark" class="view-section">
+      <div class="benchmark-container">
+        
+        <!-- Evidence Domain Isolation Banner -->
+        <div class="lab-domain-banner">
+          <div class="lab-domain-badge">
+            <span class="pulse-dot-purple"></span>
+            SCIENTIFIC VALIDATION DOMAIN — ESAOpenSR ECOSYSTEM
+          </div>
+          <div class="lab-domain-content">
+            <div class="lab-domain-title">ESAOpenSR Multi-Sensor Reference Validation Lab</div>
+            <div class="lab-domain-desc">
+              Rigorous ground-truth verification using official paired Low-Resolution (10 m Sentinel-2 L2A) and aligned High-Resolution (0.6 m – 2.5 m aerial/satellite) reference datasets (Aybar et al., 2024). True hallucination, omission, and spectral distortion are quantitatively validated here. 
+              <span class="lab-domain-warning">Strictly segregated from operational Indian Sentinel-2 Mission Mode.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dataset & Sample Selection Toolbar -->
+        <div class="lab-toolbar-card">
+          <div class="lab-toolbar-header">
+            <div>
+              <div class="lab-toolbar-title"><span>📂</span> Select Validation Benchmark Dataset</div>
+              <div class="lab-toolbar-subtitle">Official benchmark reference datasets ingested from HuggingFace <code>isp-uv-es/opensr-test</code></div>
+            </div>
+            <button class="btn-primary btn-run-lab" id="btn-run-benchmark">
+              <span class="btn-icon">⚡</span>
+              <span id="btn-run-bench-text">Run Reference Benchmark</span>
+            </button>
+          </div>
+
+          <!-- Dataset Picker Chips -->
+          <div class="dataset-chips-wrap" id="dataset-chips-container">
+            <button class="dataset-chip active" data-dataset="spain_crops">
+              <span class="ds-icon">🌾</span>
+              <div class="ds-info">
+                <span class="ds-name">Spain Crops</span>
+                <span class="ds-sub">PNOA 2.5m HR Reference</span>
+              </div>
+            </button>
+            <button class="dataset-chip" data-dataset="spain_urban">
+              <span class="ds-icon">🏙️</span>
+              <div class="ds-info">
+                <span class="ds-name">Spain Urban</span>
+                <span class="ds-sub">PNOA 2.5m HR Reference</span>
+              </div>
+            </button>
+            <button class="dataset-chip" data-dataset="naip">
+              <span class="ds-icon">🛰️</span>
+              <div class="ds-info">
+                <span class="ds-name">USDA NAIP</span>
+                <span class="ds-sub">Aerial Ortho 0.6m HR</span>
+              </div>
+            </button>
+            <button class="dataset-chip" data-dataset="spot">
+              <span class="ds-icon">🛰️</span>
+              <div class="ds-info">
+                <span class="ds-name">CNES SPOT</span>
+                <span class="ds-sub">Constellation 1.5m HR</span>
+              </div>
+            </button>
+            <button class="dataset-chip" data-dataset="venus">
+              <span class="ds-icon">🛰️</span>
+              <div class="ds-info">
+                <span class="ds-name">CNES-ISA Venµs</span>
+                <span class="ds-sub">Microsatellite 5.0m HR</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Sample Chip Selector Row -->
+          <div class="sample-selection-bar">
+            <div class="sample-label">Selected Chip:</div>
+            <div class="sample-chips-row" id="sample-chips-container">
+              <button class="sample-chip active" data-sample="sample_000">Sample #1 (ROI 00001)</button>
+              <button class="sample-chip" data-sample="sample_001">Sample #2 (ROI 00002)</button>
+              <button class="sample-chip" data-sample="sample_002">Sample #3 (ROI 00003)</button>
+              <button class="sample-chip" data-sample="sample_003">Sample #4 (ROI 00004)</button>
+              <button class="sample-chip" data-sample="sample_004">Sample #5 (ROI 00005)</button>
+            </div>
+            <div class="sample-meta-pill" id="sample-meta-pill">
+              Input: 10m L2A (128×128) → Target: 2.5m HR Reference (512×512)
+            </div>
+          </div>
+        </div>
+
+        <!-- 3-Way Synchronized Visualizer & Comparison Mode -->
+        <div class="lab-visualizer-card">
+          <div class="lab-vis-header">
+            <div class="lab-vis-title-row">
+              <span class="lab-vis-title"><span>🛰️</span> Synchronized 3-Way Reference Visualizer</span>
+              <span class="tag-provenance" id="tag-current-dataset">Dataset: spain_crops • Protocol: ESA OpenSR-test v1.3.3</span>
+            </div>
+            
+            <div class="view-mode-toggle">
+              <button class="mode-toggle-btn active" id="btn-mode-3way">3-Way Multi-Pane</button>
+              <button class="mode-toggle-btn" id="btn-mode-slider">SR vs HR Split Slider</button>
+            </div>
+          </div>
+
+          <!-- Multi-Pane 3-Way Grid -->
+          <div class="bench-3way-grid" id="bench-grid-container">
+            <div class="bench-view-box">
+              <div class="bench-box-title">
+                <span class="bench-badge-lr">1. Sentinel-2 Input (10 m)</span>
+                <span class="bench-tag-res">Low-Res Observation (L2A)</span>
+              </div>
+              <div class="bench-img-wrapper">
+                <img id="bench-img-lr" class="bench-img" alt="10 m Sentinel-2 LR">
+              </div>
+              <div class="bench-caption">Native 10 m input bands (B04, B03, B02, B08)</div>
+            </div>
+
+            <div class="bench-view-box">
+              <div class="bench-box-title">
+                <span class="bench-badge-sr">2. Spectra SR (2.5 m)</span>
+                <span class="bench-tag-res">Super-Resolved Output</span>
+              </div>
+              <div class="bench-img-wrapper">
+                <img id="bench-img-sr" class="bench-img" alt="2.5 m Super-Resolution Output">
+              </div>
+              <div class="bench-caption">4× deep reconstructed spectral representation</div>
+            </div>
+
+            <div class="bench-view-box">
+              <div class="bench-box-title">
+                <span class="bench-badge-hr">3. Harmonized HR Reference</span>
+                <span class="bench-tag-res">Ground Truth (PNOA/NAIP)</span>
+              </div>
+              <div class="bench-img-wrapper">
+                <img id="bench-img-hr" class="bench-img" alt="Ground Truth HR Reference">
+              </div>
+              <div class="bench-caption">Aligned & harmonized ground-truth reference observation</div>
+            </div>
+          </div>
+
+          <!-- Interactive Split Slider View (Hidden by default, toggled via mode buttons) -->
+          <div class="bench-slider-container" id="bench-slider-container" style="display: none;">
+            <div class="bench-split-viewer" id="bench-split-viewer">
+              <img id="bench-split-under" class="bench-split-img under" alt="Ground Truth HR">
+              <div class="bench-split-clipper" id="bench-split-clipper">
+                <img id="bench-split-over" class="bench-split-img over" alt="Spectra SR">
+              </div>
+              <div class="bench-split-divider" id="bench-split-divider">
+                <div class="bench-split-handle">↔</div>
+              </div>
+              <div class="bench-split-label left">Spectra SR (2.5 m)</div>
+              <div class="bench-split-label right">HR Ground Truth Reference</div>
+            </div>
+            <div class="split-instruction">Drag the slider horizontally to compare reconstructed edges directly against ground-truth HR imagery.</div>
+          </div>
+
+        </div>
+
+        <!-- Top Metric Summary Cards -->
+        <div class="metric-cards-grid">
+          <div class="metric-card card-hallucination">
+            <div class="metric-label-row">
+              <span class="metric-name">Hallucination Rate</span>
+              <span class="status-pill status-good" id="pill-bm-ha">EXCELLENT</span>
+            </div>
+            <div class="metric-val" id="bm-hallucination">1.42%</div>
+            <div class="metric-sub">False high-frequencies absent in HR ground truth (Goal: &lt;3.0%)</div>
+          </div>
+
+          <div class="metric-card card-omission">
+            <div class="metric-label-row">
+              <span class="metric-name">Omission Rate</span>
+              <span class="status-pill status-good" id="pill-bm-om">EXCELLENT</span>
+            </div>
+            <div class="metric-val" id="bm-omission">2.85%</div>
+            <div class="metric-sub">Real HR features missed by SR model (Goal: &lt;5.0%)</div>
+          </div>
+
+          <div class="metric-card card-improvement">
+            <div class="metric-label-row">
+              <span class="metric-name">Improvement Gain</span>
+              <span class="status-pill status-good" id="pill-bm-im">HIGH GAIN</span>
+            </div>
+            <div class="metric-val" id="bm-improvement">+34.2%</div>
+            <div class="metric-sub">Fidelity enhancement over conservative baseline (Goal: &gt;20.0%)</div>
+          </div>
+
+          <div class="metric-card card-synthesis">
+            <div class="metric-label-row">
+              <span class="metric-name">Structural Synthesis</span>
+              <span class="status-pill status-good" id="pill-bm-syn">CONFORMANT</span>
+            </div>
+            <div class="metric-val" id="bm-synthesis">0.924</div>
+            <div class="metric-sub">Ratio of realistic spatial frequency energy (Goal: &gt;0.85)</div>
+          </div>
+        </div>
+
+        <!-- Metrics & Trust Head Two-Column Grid -->
+        <div class="lab-details-grid">
+          
+          <!-- Column 1: Detailed ESAOpenSR Protocol Metrics -->
+          <div class="card">
+            <h2 class="card-title"><span>📊</span> ESAOpenSR Protocol Fidelity Metrics</h2>
+            <table class="bench-metrics-table">
+              <thead>
+                <tr>
+                  <th>Fidelity Dimension</th>
+                  <th>Scientific Definition</th>
+                  <th>Benchmark Value</th>
+                  <th>Evaluation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Physical Reflectance RMSE</strong></td>
+                  <td>Root-mean-squared error against true physical reflectance</td>
+                  <td id="bm-rmse">0.0182</td>
+                  <td><span class="status-pill status-good">EXCELLENT (&lt;0.05)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Spectral Angle Distance</strong></td>
+                  <td>Mean spectral vector deviation against ground truth spectra</td>
+                  <td id="bm-sad">2.14°</td>
+                  <td><span class="status-pill status-good">PRESERVED (&lt;4.0°)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Spatial Edge Correlation</strong></td>
+                  <td>Sobel gradient cross-correlation between SR and HR</td>
+                  <td id="bm-spatial">0.942</td>
+                  <td><span class="status-pill status-good">STRONGLY ALIGNED</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Ground Sampling Distance (GSD)</strong></td>
+                  <td>Low-Res Input vs Super-Resolved Output vs Reference GSD</td>
+                  <td id="bm-gsd">10.0m → 2.5m (Ref: 2.5m)</td>
+                  <td><span class="status-pill status-good">VERIFIED 4×</span></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="engine-attribution-note" id="engine-attribution-note">
+              <span>⚡</span> Engine: <code>ESAOpenSR opensr-test v1.3.3 PyTorch Engine</code> • Metric Suite: <code>OpenSR.Metrics</code>
+            </div>
+          </div>
+
+          <!-- Column 2: Trust Head Verification & Calibration -->
+          <div class="card trust-calib-card">
+            <div class="trust-calib-header">
+              <h2 class="card-title" style="margin-bottom: 0;"><span>🛡️</span> Trust Head Validation & Calibration</h2>
+              <span class="badge-calib">RandomForest (OpenSR)</span>
+            </div>
+            
+            <p class="trust-calib-desc">
+              The Trust Head is trained on aligned reference benchmark pairs from ESAOpenSR to identify high-risk hallucination zones prior to conservative Trust-Gating.
+            </p>
+
+            <div class="trust-stat-grid">
+              <div class="trust-stat-box">
+                <div class="trust-stat-num" id="th-auc">0.744</div>
+                <div class="trust-stat-label">Multi-Class ROC-AUC</div>
+              </div>
+              <div class="trust-stat-box">
+                <div class="trust-stat-num" id="th-f1">0.640</div>
+                <div class="trust-stat-label">Weighted F1 Score</div>
+              </div>
+              <div class="trust-stat-box">
+                <div class="trust-stat-num" id="th-acc">62.7%</div>
+                <div class="trust-stat-label">Scene-Split Accuracy</div>
+              </div>
+            </div>
+
+            <div class="feature-importances-wrap">
+              <div class="feature-importances-title">Feature Importance Weights in Trust Decision:</div>
+              <div class="feature-bars-list" id="feature-bars-list">
+                <!-- Dynamically filled with feature bars -->
+              </div>
+            </div>
+
+            <div class="chip-risk-comparison" id="chip-risk-comparison">
+              <div class="chip-risk-row">
+                <span>Chip Predicted Risk Level:</span>
+                <strong id="chip-predicted-risk" class="risk-low">LOW RISK (0.14)</strong>
+              </div>
+              <div class="chip-risk-row">
+                <span>Ground-Truth Verification:</span>
+                <strong id="chip-gt-verif" style="color: #166534;">CONCORDANT (Reflectance Error &lt; 0.03)</strong>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Official Provenance, Attribution & Citation Section -->
+        <div class="card provenance-card">
+          <div class="prov-header">
+            <div>
+              <h2 class="card-title"><span>📜</span> Reference Data Provenance & Scientific Citation</h2>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                All benchmark data in this Validation Lab are loaded from the official ESAOpenSR opensr-test ecosystem.
+              </div>
+            </div>
+            <span class="license-tag">CC BY 4.0 License</span>
+          </div>
+
+          <div class="prov-grid">
+            <div class="prov-info-col">
+              <div class="prov-item">
+                <strong>Repository:</strong> <a href="https://github.com/ESAOpenSR/opensr-test" target="_blank" class="ext-link">github.com/ESAOpenSR/opensr-test ↗</a>
+              </div>
+              <div class="prov-item">
+                <strong>HuggingFace Dataset:</strong> <a href="https://huggingface.co/datasets/isp-uv-es/opensr-test" target="_blank" class="ext-link">huggingface.co/datasets/isp-uv-es/opensr-test ↗</a>
+              </div>
+              <div class="prov-item">
+                <strong>Attribution:</strong> Image and Spatial Processing (ISP) group, Universitat de València &amp; European Space Agency (ESA).
+              </div>
+              <div class="prov-disclaimer-box">
+                <strong>Validation Domain Constraint:</strong>
+                All imagery displayed in this Validation Lab constitutes OpenSR benchmark reference data for algorithm verification. It is not operational Indian Sentinel-2 imagery. Operational Indian missions are strictly managed under Mission Console.
+              </div>
+            </div>
+
+            <div class="bibtex-col">
+              <div class="bibtex-label">BibTeX Citation:</div>
+              <pre class="bibtex-box"><code>@article{aybar2024opensr,
+  title={OpenSR-test: A comprehensive benchmark dataset and suite for satellite super-resolution},
+  author={Aybar, Cesar and Mateo-Garcia, Gonzalo and Camps-Valls, Gustau and others},
+  journal={arXiv preprint arXiv:2404.14867},
+  year={2024},
+  publisher={European Space Agency / Universitat de València}
+}</code></pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
