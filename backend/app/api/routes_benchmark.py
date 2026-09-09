@@ -116,7 +116,7 @@ def list_benchmark_datasets() -> List[BenchmarkDatasetInfo]:
         
         default_desc = DATASET_DESCRIPTIONS.get(ds_name, f"ESAOpenSR {ds_name} benchmark reference")
         lr_res = "10 m (Sentinel-2 L2A)"
-        hr_res = "2.5 m (PNOA reference)" if "spain" in ds_name else ("0.6 m (NAIP)" if ds_name == "naip" else ("1.5 m (SPOT)" if ds_name == "spot" else "5.0 m (Venµs)"))
+        hr_res = "2.5 m (High-Res Reference)" if "spain" in ds_name else ("0.6 m (High-Res Aerial)" if ds_name == "naip" else ("1.5 m (High-Res Satellite)" if ds_name == "spot" else "5.0 m (Super-Spectral)"))
         provenance = f"ESAOpenSR opensr-test / {ds_name.upper()}"
         citation = "Aybar et al. (2024), OpenSR-test"
         

@@ -806,13 +806,7 @@ async function runValidationBenchmark() {
     if (imgSplitUnder) imgSplitUnder.src = data.artifacts.hr_preview;
     if (imgSplitOver) imgSplitOver.src = data.artifacts.sr_preview;
 
-    // 3. Update Provenance Tag
-    const tagDs = document.getElementById('tag-current-dataset');
-    if (tagDs) {
-      tagDs.innerText = `Dataset: ${data.dataset_name} (${data.sample_id}) • Protocol: ESA OpenSR-test v${data.opensr_test_version}`;
-    }
-
-    // 4. Update Top Metric Cards
+    // 3. Update Top Metric Cards
     const m = data.metrics;
     
     // Hallucination Rate
