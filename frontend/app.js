@@ -67,7 +67,7 @@ const PRESET_SCENES = {
     sourceId: 'S2B_MSIL2A_20260215T052029_T43QDA',
     coords: '18.5204° N, 73.8567° E (EPSG:32643)',
     cloud: 2.1,
-    desc: 'Mixed agrarian fields, riparian river basin, and peri-urban boundary parcel structures.'
+    desc: 'Highway corridor, peri-urban settlements & smallholder agrarian parcels.'
   },
   scene_punjab_crop: {
     name: 'Ludhiana Intensive Agriculture, Punjab',

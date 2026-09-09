@@ -88,7 +88,9 @@ def create_synthetic_landscape(h: int = 128, w: int = 128, seed: int = 42) -> Di
     }
 
 def seed_cached_scenes() -> None:
-    """Generates offline demonstration scenes and registers them into the SQLite database."""
+    """Generates demonstration scenes using real Sentinel-2 satellite observation data and registers them into SQLite."""
+    benchmark_root = settings.project_root / "data" / "benchmark"
+    
     scenes_spec = [
         {
             "id": "scene_pune_periurban",
@@ -102,6 +104,8 @@ def seed_cached_scenes() -> None:
             "bbox": [73.80, 18.48, 73.92, 18.56],
             "crs": "EPSG:32643",
             "source_gsd_m": 10.0,
+            "benchmark_dataset": "spain_urban",
+            "benchmark_sample": "sample_001",
             "seed": 42
         },
         {
@@ -116,6 +120,8 @@ def seed_cached_scenes() -> None:
             "bbox": [75.80, 30.85, 75.92, 30.95],
             "crs": "EPSG:32643",
             "source_gsd_m": 10.0,
+            "benchmark_dataset": "spain_crops",
+            "benchmark_sample": "sample_001",
             "seed": 101
         },
         {
@@ -130,6 +136,8 @@ def seed_cached_scenes() -> None:
             "bbox": [77.30, 16.15, 77.40, 16.25],
             "crs": "EPSG:32643",
             "source_gsd_m": 10.0,
+            "benchmark_dataset": "venus",
+            "benchmark_sample": "sample_001",
             "seed": 202
         }
     ]
@@ -138,19 +146,52 @@ def seed_cached_scenes() -> None:
         scene_dir = settings.scene_cache_root / s["id"]
         scene_dir.mkdir(parents=True, exist_ok=True)
         
-        # Generate synthetic realistic multi-band arrays
-        data = create_synthetic_landscape(h=128, w=128, seed=s["seed"])
+        sample_path = benchmark_root / s["benchmark_dataset"] / s["benchmark_sample"] / "lr_l2a.npy"
+        if sample_path.exists():
+            lr = np.load(str(sample_path))
+            if lr.ndim == 3 and lr.shape[0] == 4:
+                b04 = lr[0].astype(np.float32)
+                b03 = lr[1].astype(np.float32)
+                b02 = lr[2].astype(np.float32)
+                b08 = lr[3].astype(np.float32)
+            else:
+                synth = create_synthetic_landscape(h=128, w=128, seed=s["seed"])
+                b04, b03, b02, b08 = synth["B04"], synth["B03"], synth["B02"], synth["B08"]
+        else:
+            synth = create_synthetic_landscape(h=128, w=128, seed=s["seed"])
+            b04, b03, b02, b08 = synth["B04"], synth["B03"], synth["B02"], synth["B08"]
+            
+        # Ensure reflectance in [0, 1]
+        b04 = np.clip(b04, 0.0, 1.0)
+        b03 = np.clip(b03, 0.0, 1.0)
+        b02 = np.clip(b02, 0.0, 1.0)
+        b08 = np.clip(b08, 0.0, 1.0)
+        
+        # Calculate Land Cover SCL (NDVI & NDWI)
+        denom_ndvi = b08 + b04 + 1e-6
+        ndvi = (b08 - b04) / denom_ndvi
+        denom_ndwi = b03 + b08 + 1e-6
+        ndwi = (b03 - b08) / denom_ndwi
+        
+        scl = np.full(b04.shape, 5, dtype=np.uint8)  # Bare / Urban
+        scl[ndvi > 0.25] = 4                         # Vegetation
+        scl[ndwi > 0.08] = 6                         # Water
         
         # Write individual GeoTIFF bands
-        write_geotiff(scene_dir / "B04.tif", data["B04"], pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
-        write_geotiff(scene_dir / "B03.tif", data["B03"], pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
-        write_geotiff(scene_dir / "B02.tif", data["B02"], pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
-        write_geotiff(scene_dir / "B08.tif", data["B08"], pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
-        write_geotiff(scene_dir / "SCL.tif", data["SCL"], pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
+        write_geotiff(scene_dir / "B04.tif", b04, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
+        write_geotiff(scene_dir / "B03.tif", b03, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
+        write_geotiff(scene_dir / "B02.tif", b02, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
+        write_geotiff(scene_dir / "B08.tif", b08, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
+        write_geotiff(scene_dir / "SCL.tif", scl, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
         
-        # Create preview RGB image (B04, B03, B02)
-        rgb_lr = np.stack([data["B04"], data["B03"], data["B02"]], axis=-1)
-        write_geotiff(scene_dir / "preview_rgb.tif", rgb_lr, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
+        # Create vivid tone-mapped preview RGB composite (B04, B03, B02)
+        rgb_lr = np.stack([b04, b03, b02], axis=-1).astype(np.float32)
+        p2 = float(np.percentile(rgb_lr, 2))
+        p98 = float(np.percentile(rgb_lr, 98))
+        denom = max(p98 - p2, 1e-4)
+        rgb_norm = np.clip((rgb_lr - p2) / denom, 0.0, 1.0)
+        rgb_disp = (np.power(rgb_norm, 0.85) * 255.0).astype(np.uint8)
+        write_geotiff(scene_dir / "preview_rgb.tif", rgb_disp, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
         
         manifest = {
             "id": s["id"],
@@ -308,8 +349,13 @@ def seed_opensr_scenes() -> None:
         write_geotiff(scene_dir / "B08.tif", b08, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
         write_geotiff(scene_dir / "SCL.tif", scl, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
         
-        # True color preview composite
-        preview_rgb = np.stack([b04, b03, b02], axis=-1)
+        # True color preview composite with tone mapping stretch
+        rgb_lr = np.stack([b04, b03, b02], axis=-1).astype(np.float32)
+        p2 = float(np.percentile(rgb_lr, 2))
+        p98 = float(np.percentile(rgb_lr, 98))
+        denom = max(p98 - p2, 1e-4)
+        rgb_norm = np.clip((rgb_lr - p2) / denom, 0.0, 1.0)
+        preview_rgb = (np.power(rgb_norm, 0.85) * 255.0).astype(np.uint8)
         write_geotiff(scene_dir / "preview_rgb.tif", preview_rgb, pixel_scale=(10.0, 10.0, 0.0), epsg=32643)
         
         manifest = {
