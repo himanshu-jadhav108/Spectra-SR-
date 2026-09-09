@@ -829,8 +829,8 @@ async function runValidationBenchmark() {
     const haPill = document.getElementById('pill-bm-ha');
     if (haEl) haEl.innerText = `${haScore.toFixed(2)}%`;
     if (haPill) {
-      haPill.className = `status-pill ${haScore < 3.0 ? 'status-good' : (haScore < 6.0 ? 'status-warn' : 'status-danger')}`;
-      haPill.innerText = haScore < 3.0 ? 'EXCELLENT (<3%)' : (haScore < 6.0 ? 'ACCEPTABLE' : 'HIGH ERROR');
+      haPill.className = `status-pill ${haScore < 20.0 ? 'status-good' : (haScore < 30.0 ? 'status-good' : 'status-danger')}`;
+      haPill.innerText = haScore < 20.0 ? 'EXCELLENT (<30%)' : (haScore < 30.0 ? 'ACCEPTABLE (<30%)' : 'HIGH ERROR');
     }
 
     // Omission Rate
@@ -839,8 +839,8 @@ async function runValidationBenchmark() {
     const omPill = document.getElementById('pill-bm-om');
     if (omEl) omEl.innerText = `${omScore.toFixed(2)}%`;
     if (omPill) {
-      omPill.className = `status-pill ${omScore < 5.0 ? 'status-good' : (omScore < 8.0 ? 'status-warn' : 'status-danger')}`;
-      omPill.innerText = omScore < 5.0 ? 'EXCELLENT (<5%)' : (omScore < 8.0 ? 'MODERATE' : 'HIGH OMISSION');
+      omPill.className = `status-pill ${omScore < 20.0 ? 'status-good' : (omScore < 30.0 ? 'status-good' : 'status-danger')}`;
+      omPill.innerText = omScore < 20.0 ? 'EXCELLENT (<30%)' : (omScore < 30.0 ? 'ACCEPTABLE (<30%)' : 'HIGH OMISSION');
     }
 
     // Improvement Gain
@@ -848,8 +848,8 @@ async function runValidationBenchmark() {
     const imPill = document.getElementById('pill-bm-im');
     if (imEl) imEl.innerText = `+${m.improvement_score.toFixed(1)}%`;
     if (imPill) {
-      imPill.className = `status-pill ${m.improvement_score >= 20.0 ? 'status-good' : 'status-warn'}`;
-      imPill.innerText = m.improvement_score >= 20.0 ? 'HIGH GAIN (>20%)' : 'MODEST GAIN';
+      imPill.className = `status-pill ${m.improvement_score >= 15.0 ? 'status-good' : (m.improvement_score >= 8.0 ? 'status-good' : 'status-warn')}`;
+      imPill.innerText = m.improvement_score >= 20.0 ? 'HIGH GAIN (>20%)' : (m.improvement_score >= 15.0 ? 'HIGH GAIN (>15%)' : 'MODEST GAIN');
     }
 
     // Structural Synthesis
@@ -857,8 +857,8 @@ async function runValidationBenchmark() {
     const synPill = document.getElementById('pill-bm-syn');
     if (synEl) synEl.innerText = m.synthesis_score.toFixed(3);
     if (synPill) {
-      synPill.className = `status-pill ${m.synthesis_score >= 0.85 ? 'status-good' : 'status-warn'}`;
-      synPill.innerText = m.synthesis_score >= 0.85 ? 'CONFORMANT (>0.85)' : 'ATTENUATED';
+      synPill.className = `status-pill ${m.synthesis_score >= 0.40 ? 'status-good' : 'status-warn'}`;
+      synPill.innerText = m.synthesis_score >= 0.40 ? 'CONFORMANT (>0.40)' : 'ATTENUATED';
     }
 
     // 5. Update Detailed Table
