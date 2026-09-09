@@ -1,0 +1,25 @@
+# Spectra SR Production Requirements
+# High-Performance Satellite Super-Resolution & Trust Engine
+
+# Core API Framework
+fastapi>=0.110.0,<1.0.0
+uvicorn[standard]>=0.28.0,<1.0.0
+pydantic>=2.6.0,<3.0.0
+python-multipart>=0.0.9
+
+# Scientific Computing & Geospatial Image Processing
+numpy>=1.24.0,<2.0.0
+scipy>=1.11.0,<2.0.0
+pillow>=10.0.0,<11.0.0
+opencv-python-headless>=4.8.0.76,<5.0.0
+
+# Machine Learning & Trust Head Architecture
+scikit-learn>=1.3.0,<2.0.0
+joblib>=1.3.0,<2.0.0
+
+# HTTP & API Integrations (STAC / CDSE / Testing)
+httpx>=0.27.0,<1.0.0
+
+# Optional Benchmark & Reference Validation Engine
+# Note: opensr-test can be installed where torch/torchvision is available
+# opensr-test>=1.3.3

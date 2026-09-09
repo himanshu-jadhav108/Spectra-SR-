@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  spectra-sr:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spectra_sr_app
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - APP_ENV=production
+      - DATA_SOURCE=local
+      - DEVICE=cpu
+      - MAX_CONCURRENT_JOBS=2
+    volumes:
+      # Persist job artifacts and database across container restarts
+      - ./storage/jobs:/app/storage/jobs
+      - ./storage/db:/app/storage/db
+    restart: unless-stopped

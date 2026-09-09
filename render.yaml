@@ -1,0 +1,24 @@
+# =========================================================================
+# Render Blueprint Configuration for Spectra SR
+# https://render.com/docs/blueprint-spec
+# =========================================================================
+
+services:
+  - type: web
+    name: spectra-sr
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /api/v1/health
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATA_SOURCE
+        value: local
+      - key: DEVICE
+        value: cpu
+      - key: WORKERS
+        value: "1"
+      - key: MAX_CONCURRENT_JOBS
+        value: "1"

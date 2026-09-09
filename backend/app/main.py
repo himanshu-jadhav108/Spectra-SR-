@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -80,6 +80,13 @@ def get_style():
 def get_js():
     js_path = settings.project_root / "frontend" / "app.js"
     return FileResponse(str(js_path), media_type="application/javascript")
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    icon_path = settings.project_root / "frontend" / "public" / "brand" / "spectra-sr-logo.png"
+    if icon_path.exists():
+        return FileResponse(str(icon_path), media_type="image/png")
+    return Response(status_code=204)
 
 @app.get("/")
 def index():

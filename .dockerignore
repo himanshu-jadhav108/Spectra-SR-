@@ -1,0 +1,33 @@
+# Git & Version Control
+.git
+.gitignore
+
+# Python Bytecode & Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+.env.local
+venv/
+env/
+.venv/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE & OS Artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Ephemeral Job Runs & Runtime SQLite Temp DB
+storage/jobs/*
+!storage/jobs/.gitkeep
+storage/db/*.sqlite3
+!storage/db/.gitkeep
