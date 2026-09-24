@@ -86,15 +86,25 @@ frontend_dist = settings.project_root / "frontend" / "dist"
 if frontend_dist.exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
 
+frontend_dir = settings.project_root / "frontend"
+if frontend_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
+
+NO_CACHE_HEADERS = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0"
+}
+
 @app.get("/style.css")
 def get_style():
     css_path = settings.project_root / "frontend" / "style.css"
-    return FileResponse(str(css_path), media_type="text/css")
+    return FileResponse(str(css_path), media_type="text/css", headers=NO_CACHE_HEADERS)
 
 @app.get("/app.js")
 def get_js():
     js_path = settings.project_root / "frontend" / "app.js"
-    return FileResponse(str(js_path), media_type="application/javascript")
+    return FileResponse(str(js_path), media_type="application/javascript", headers=NO_CACHE_HEADERS)
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
@@ -109,14 +119,14 @@ def index():
     # If dist index.html exists, serve it; otherwise serve frontend/index.html
     dist_index = settings.project_root / "frontend" / "dist" / "index.html"
     if dist_index.exists():
-        return FileResponse(str(dist_index))
+        return FileResponse(str(dist_index), headers=NO_CACHE_HEADERS)
     dev_index = settings.project_root / "frontend" / "index.html"
     if dev_index.exists():
-        return FileResponse(str(dev_index))
+        return FileResponse(str(dev_index), headers=NO_CACHE_HEADERS)
     return {
         "status": "online",
         "app": "Spectra SR",
-        "version": "0.1.0",
+        "version": "0.2.0",
         "docs": "/docs",
         "health": "/api/v1/health"
     }
