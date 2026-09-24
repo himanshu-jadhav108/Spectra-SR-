@@ -17,6 +17,7 @@ from backend.app.api.routes_scenes import router as scenes_router
 from backend.app.api.routes_jobs import router as jobs_router
 from backend.app.api.routes_artifacts import router as artifacts_router
 from backend.app.api.routes_benchmark import router as benchmark_router
+from backend.app.api.routes_demo import router as demo_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,8 +29,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Spectra SR API",
-    description="Deep Learning Based Super Resolution Mapping (Sentinel-2 10 m to 2.5 m) with Trust Engine",
-    version="0.1.0",
+    description="Evidence-Gated Super-Resolution for Trustworthy Satellite Analysis (Sentinel-2 10 m to 2.5 m)",
+    version="0.2.0",
     lifespan=lifespan
 )
 
@@ -53,6 +54,7 @@ app.include_router(scenes_router, prefix="/api/v1")
 app.include_router(jobs_router, prefix="/api/v1")
 app.include_router(artifacts_router, prefix="/api/v1")
 app.include_router(benchmark_router, prefix="/api/v1")
+app.include_router(demo_router, prefix="/api/v1")
 
 # Also include directly at root to satisfy contracts/openapi.yaml
 app.include_router(health_router)
@@ -60,11 +62,19 @@ app.include_router(scenes_router)
 app.include_router(jobs_router)
 app.include_router(artifacts_router)
 app.include_router(benchmark_router)
+app.include_router(demo_router)
 
 # Mount Brand Assets
 brand_dir = settings.project_root / "frontend" / "public" / "brand"
 if brand_dir.exists():
     app.mount("/brand", StaticFiles(directory=str(brand_dir)), name="brand")
+
+# Mount Demo Assets
+demo_dir = settings.project_root / "demo"
+if demo_dir.exists():
+    app.mount("/demo", StaticFiles(directory=str(demo_dir)), name="demo")
+elif (settings.project_root / "frontend" / "public" / "demo").exists():
+    app.mount("/demo", StaticFiles(directory=str(settings.project_root / "frontend" / "public" / "demo")), name="demo")
 
 # Mount Public Assets if exists
 public_dir = settings.project_root / "frontend" / "public"
