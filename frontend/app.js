@@ -6,7 +6,8 @@
 
 // Global State
 const state = {
-  currentView: 'console', // 'console', 'processing', 'analysis', 'benchmark'
+  currentView: 'demo', // 'demo', 'benchmark', 'console', 'processing', 'analysis'
+  activeMode: 'demo', // 'demo', 'validation', 'console'
   selectedSceneId: 'opensr_spain_crops',
   currentJobId: null,
   activeLayer: 'safe_sr', // 'raw_sr', 'safe_sr', 'risk_map', 'agri_boundary'
@@ -14,6 +15,20 @@ const state = {
   sliderPos: 50, // 0 to 100%
   isDraggingSlider: false,
   benchmarkData: null,
+  
+  // Dedicated Video Demo Mode State
+  demoStep: 1, // 1 to 6
+  demoZoom: 1.0,
+  demoPanX: 0,
+  demoPanY: 0,
+  demoSrSliderPos: 50,
+  demoGateSliderPos: 50,
+  isDraggingDemoSrSlider: false,
+  isDraggingDemoGateSlider: false,
+  autoTourInterval: null,
+  tourElapsedSec: 0,
+  tourTimerInterval: null,
+  demoMetadata: null,
   
   // Validation Lab State
   benchmarkDataset: 'spain_crops',
@@ -89,15 +104,16 @@ const PRESET_SCENES = {
 const PIPELINE_STEPS = [
   { id: 'DISCOVER_SCENE', label: 'Scene Discovery' },
   { id: 'PREPROCESS', label: 'Preprocessing' },
-  { id: 'SR_INFERENCE', label: 'SEN2SRLite (4×)' },
-  { id: 'TRUST_ANALYSIS', label: 'Trust Engine' },
-  { id: 'TRUST_GATING', label: 'Trust-Gating' },
+  { id: 'SR_INFERENCE', label: 'SR Pipeline (4×)' },
+  { id: 'TRUST_ANALYSIS', label: 'Reliability Head' },
+  { id: 'TRUST_GATING', label: 'Evidence Gate' },
   { id: 'AGRI_BOUNDARY', label: 'Agri Boundary' },
   { id: 'ARTIFACT_WRITE', label: 'Artifact Export' },
   { id: 'COMPLETE', label: 'Complete' }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
+  initVideoDemoMode();
   initNavigation();
   initPresetSelection();
   initFileUpload();
@@ -579,7 +595,7 @@ function initLayerToggles() {
       } else if (layer === 'raw_sr') {
         if (imgSR) imgSR.src = artifacts.preview_raw_sr;
         if (imgRisk) imgRisk.classList.remove('visible');
-        if (rightLabel) rightLabel.innerText = 'Raw SEN2SRLite (2.5 m)';
+        if (rightLabel) rightLabel.innerText = 'Raw SR Candidate (2.5 m)';
       } else if (layer === 'risk_map') {
         if (imgSR) imgSR.src = artifacts.preview_safe_sr;
         if (imgRisk) imgRisk.classList.add('visible');
@@ -983,4 +999,410 @@ function initBenchSplitSlider() {
   window.setBenchSliderPosition = setBenchSliderPosition;
   setBenchSliderPosition(state.benchSliderPos || 50);
 }
+
+// =========================================================================
+// Dedicated Video Demo Mode Controller (SIH 2026 Submission Demonstration)
+// =========================================================================
+
+function initVideoDemoMode() {
+  // Stepper buttons 1 through 6
+  for (let i = 1; i <= 6; i++) {
+    const btn = document.getElementById(`stepper-btn-${i}`);
+    if (btn) {
+      btn.addEventListener('click', () => goToDemoStep(i));
+    }
+  }
+
+  // Presenter HUD controls
+  const btnPrev = document.getElementById('btn-demo-prev');
+  const btnNext = document.getElementById('btn-demo-next');
+  if (btnPrev) btnPrev.addEventListener('click', () => goToDemoStep(state.demoStep - 1));
+  if (btnNext) btnNext.addEventListener('click', () => goToDemoStep(state.demoStep + 1));
+
+  // Step action buttons
+  const btnStep1Run = document.getElementById('btn-step1-run-sr');
+  if (btnStep1Run) btnStep1Run.addEventListener('click', () => {
+    goToDemoStep(2);
+    startTourTimer();
+  });
+
+  const btnStep2Next = document.getElementById('btn-step2-next');
+  if (btnStep2Next) btnStep2Next.addEventListener('click', () => goToDemoStep(3));
+
+  const btnStep3Next = document.getElementById('btn-step3-next');
+  if (btnStep3Next) btnStep3Next.addEventListener('click', () => goToDemoStep(4));
+
+  const btnStep4Next = document.getElementById('btn-step4-next');
+  if (btnStep4Next) btnStep4Next.addEventListener('click', () => goToDemoStep(5));
+
+  const btnStep5Next = document.getElementById('btn-step5-next');
+  if (btnStep5Next) btnStep5Next.addEventListener('click', () => goToDemoStep(6));
+
+  const btnReplay = document.getElementById('btn-demo-replay');
+  if (btnReplay) btnReplay.addEventListener('click', () => {
+    resetDemoTimer();
+    goToDemoStep(1);
+  });
+
+  const btnGotoLab = document.getElementById('btn-demo-goto-lab');
+  if (btnGotoLab) btnGotoLab.addEventListener('click', () => setMode('validation'));
+
+  // Top Mode Switcher buttons
+  const btnModeDemo = document.getElementById('btn-mode-demo');
+  const btnModeVal = document.getElementById('btn-mode-validation');
+  const btnModeConsole = document.getElementById('btn-mode-console');
+
+  if (btnModeDemo) btnModeDemo.addEventListener('click', () => setMode('demo'));
+  if (btnModeVal) btnModeVal.addEventListener('click', () => setMode('validation'));
+  if (btnModeConsole) btnModeConsole.addEventListener('click', () => setMode('console'));
+
+  // Auto Tour
+  const btnTour = document.getElementById('btn-demo-tour');
+  if (btnTour) btnTour.addEventListener('click', toggleAutoTour);
+
+  // Zoom controls for Step 2
+  initDemoZoomControls();
+
+  // Sliders for Step 2 and Step 5
+  initDemoSrSlider();
+  initDemoGateSlider();
+
+  // Reliability screen visual layer toggles (4 Modes)
+  const btnRelOverlay = document.getElementById('btn-toggle-rel-overlay');
+  const btnRelPure = document.getElementById('btn-toggle-rel-pure');
+  const btnRiskMap = document.getElementById('btn-toggle-risk-map');
+  const btnUncertMap = document.getElementById('btn-toggle-uncert-map');
+  const imgRel = document.getElementById('demo-img-reliability');
+  
+  const relButtons = [
+    { btn: btnRelOverlay, src: '/demo/reliability_demo.png' },
+    { btn: btnRelPure, src: '/demo/reliability_pure.png' },
+    { btn: btnRiskMap, src: '/demo/risk_demo.png' },
+    { btn: btnUncertMap, src: '/demo/uncertainty_demo.png' }
+  ];
+
+  relButtons.forEach(item => {
+    if (item.btn && imgRel) {
+      item.btn.addEventListener('click', () => {
+        relButtons.forEach(other => other.btn && other.btn.classList.remove('active'));
+        item.btn.classList.add('active');
+        imgRel.src = item.src;
+      });
+    }
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', handleDemoKeyboard);
+
+  // Initial step setup
+  goToDemoStep(1);
+  loadDemoMetadata();
+}
+
+function setMode(modeName) {
+  state.activeMode = modeName;
+  document.querySelectorAll('.mode-pill-btn').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById(`btn-mode-${modeName}`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  if (modeName === 'demo') {
+    setView('demo');
+  } else if (modeName === 'validation') {
+    setView('benchmark');
+    if (!state.benchmarkData) {
+      runValidationBenchmark();
+    }
+  } else if (modeName === 'console') {
+    setView('console');
+  }
+}
+
+function goToDemoStep(step) {
+  if (step < 1) step = 1;
+  if (step > 6) step = 6;
+  state.demoStep = step;
+
+  // Update step panes
+  for (let i = 1; i <= 6; i++) {
+    const pane = document.getElementById(`demo-step-${i}`);
+    if (pane) {
+      if (i === step) {
+        pane.classList.add('active');
+      } else {
+        pane.classList.remove('active');
+      }
+    }
+
+    const btn = document.getElementById(`stepper-btn-${i}`);
+    if (btn) {
+      btn.classList.remove('active', 'completed');
+      if (i === step) {
+        btn.classList.add('active');
+      } else if (i < step) {
+        btn.classList.add('completed');
+      }
+    }
+  }
+
+  // Update Prev / Next buttons in HUD
+  const btnPrev = document.getElementById('btn-demo-prev');
+  const btnNext = document.getElementById('btn-demo-next');
+  if (btnPrev) btnPrev.disabled = (step === 1);
+  if (btnNext) btnNext.disabled = (step === 6);
+
+  // Trigger slider repositioning for active step
+  if (step === 2 && window.setDemoSrSliderPosition) {
+    window.setDemoSrSliderPosition(state.demoSrSliderPos || 50);
+  }
+  if (step === 5 && window.setDemoGateSliderPosition) {
+    window.setDemoGateSliderPosition(state.demoGateSliderPos || 50);
+  }
+}
+
+function initDemoZoomControls() {
+  const container = document.getElementById('demo-sr-split-box');
+  const indicator = document.getElementById('demo-zoom-indicator');
+  const btnIn = document.getElementById('btn-demo-zoom-in');
+  const btnOut = document.getElementById('btn-demo-zoom-out');
+  const btnReset = document.getElementById('btn-demo-zoom-reset');
+  const btnRoi = document.getElementById('btn-demo-zoom-roi');
+
+  function updateZoom(level, px = 0, py = 0) {
+    state.demoZoom = Math.max(1.0, Math.min(3.5, level));
+    state.demoPanX = px;
+    state.demoPanY = py;
+    if (container) {
+      container.style.setProperty('--zoom-level', state.demoZoom);
+      container.style.setProperty('--pan-x', `${px}px`);
+      container.style.setProperty('--pan-y', `${py}px`);
+    }
+    if (indicator) {
+      indicator.innerText = `${state.demoZoom.toFixed(1)}×`;
+    }
+  }
+
+  if (btnIn) btnIn.addEventListener('click', () => updateZoom(state.demoZoom + 0.5));
+  if (btnOut) btnOut.addEventListener('click', () => updateZoom(state.demoZoom - 0.5));
+  if (btnReset) btnReset.addEventListener('click', () => updateZoom(1.0, 0, 0));
+  if (btnRoi) btnRoi.addEventListener('click', () => updateZoom(2.2, -30, 20));
+}
+
+function initDemoSrSlider() {
+  const container = document.getElementById('demo-sr-split-box');
+  const imgLr = document.getElementById('demo-img-lr');
+  const divider = document.getElementById('demo-sr-divider');
+  if (!container || !divider || !imgLr) return;
+
+  function setPos(pos) {
+    pos = Math.max(1, Math.min(99, pos));
+    state.demoSrSliderPos = pos;
+    container.style.setProperty('--split-pos', `${pos}%`);
+    imgLr.style.clipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
+    imgLr.style.webkitClipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
+    divider.style.left = `${pos}%`;
+  }
+
+  function onMove(e) {
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+    if (clientX === undefined) return;
+    const pos = ((clientX - rect.left) / rect.width) * 100;
+    setPos(pos);
+  }
+
+  function onPointerDown(e) {
+    state.isDraggingDemoSrSlider = true;
+    try {
+      if (e.pointerId && container.setPointerCapture) {
+        container.setPointerCapture(e.pointerId);
+      }
+    } catch (_) {}
+    onMove(e);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onPointerMove(e) {
+    if (!state.isDraggingDemoSrSlider) return;
+    onMove(e);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onPointerUp(e) {
+    if (!state.isDraggingDemoSrSlider) return;
+    state.isDraggingDemoSrSlider = false;
+    try {
+      if (e && e.pointerId && container.hasPointerCapture && container.hasPointerCapture(e.pointerId)) {
+        container.releasePointerCapture(e.pointerId);
+      }
+    } catch (_) {}
+  }
+
+  container.addEventListener('pointerdown', onPointerDown);
+  container.addEventListener('pointermove', onPointerMove, { passive: false });
+  container.addEventListener('pointerup', onPointerUp);
+  container.addEventListener('pointercancel', onPointerUp);
+  window.addEventListener('pointermove', onPointerMove, { passive: false });
+  window.addEventListener('pointerup', onPointerUp);
+
+  window.setDemoSrSliderPosition = setPos;
+  setPos(state.demoSrSliderPos || 50);
+}
+
+function initDemoGateSlider() {
+  const container = document.getElementById('demo-gate-split-box');
+  const imgRaw = document.getElementById('demo-img-raw');
+  const divider = document.getElementById('demo-gate-divider');
+  if (!container || !divider || !imgRaw) return;
+
+  function setPos(pos) {
+    pos = Math.max(1, Math.min(99, pos));
+    state.demoGateSliderPos = pos;
+    container.style.setProperty('--split-pos', `${pos}%`);
+    imgRaw.style.clipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
+    imgRaw.style.webkitClipPath = `polygon(0 0, ${pos}% 0, ${pos}% 100%, 0 100%)`;
+    divider.style.left = `${pos}%`;
+  }
+
+  function onMove(e) {
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+    if (clientX === undefined) return;
+    const pos = ((clientX - rect.left) / rect.width) * 100;
+    setPos(pos);
+  }
+
+  function onPointerDown(e) {
+    state.isDraggingDemoGateSlider = true;
+    try {
+      if (e.pointerId && container.setPointerCapture) {
+        container.setPointerCapture(e.pointerId);
+      }
+    } catch (_) {}
+    onMove(e);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onPointerMove(e) {
+    if (!state.isDraggingDemoGateSlider) return;
+    onMove(e);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function onPointerUp(e) {
+    if (!state.isDraggingDemoGateSlider) return;
+    state.isDraggingDemoGateSlider = false;
+    try {
+      if (e && e.pointerId && container.hasPointerCapture && container.hasPointerCapture(e.pointerId)) {
+        container.releasePointerCapture(e.pointerId);
+      }
+    } catch (_) {}
+  }
+
+  container.addEventListener('pointerdown', onPointerDown);
+  container.addEventListener('pointermove', onPointerMove, { passive: false });
+  container.addEventListener('pointerup', onPointerUp);
+  container.addEventListener('pointercancel', onPointerUp);
+  window.addEventListener('pointermove', onPointerMove, { passive: false });
+  window.addEventListener('pointerup', onPointerUp);
+
+  window.setDemoGateSliderPosition = setPos;
+  setPos(state.demoGateSliderPos || 50);
+}
+
+async function loadDemoMetadata() {
+  try {
+    const res = await fetch('/api/v1/demo/scene');
+    if (!res.ok) return;
+    const data = await res.json();
+    state.demoMetadata = data;
+  } catch (err) {
+    console.warn('Could not load demo scene metadata from API, using cached assets:', err);
+  }
+}
+
+// Auto Tour Timing & Playback (Optimized for ~2:30 – 2:50 Recording)
+function toggleAutoTour() {
+  const btn = document.getElementById('btn-demo-tour');
+  if (state.autoTourInterval) {
+    // Stop tour
+    clearInterval(state.autoTourInterval);
+    state.autoTourInterval = null;
+    stopTourTimer();
+    if (btn) {
+      btn.innerText = '⚡ Auto Tour';
+      btn.classList.remove('running');
+    }
+  } else {
+    // Start tour
+    startTourTimer();
+    if (btn) {
+      btn.innerText = '⏸ Pause Tour';
+      btn.classList.add('running');
+    }
+    // Advance step every 25 seconds (total ~2:30 for 6 steps)
+    state.autoTourInterval = setInterval(() => {
+      if (state.demoStep < 6) {
+        goToDemoStep(state.demoStep + 1);
+      } else {
+        toggleAutoTour(); // Finished
+      }
+    }, 25000);
+  }
+}
+
+function startTourTimer() {
+  if (state.tourTimerInterval) return;
+  const timerEl = document.getElementById('demo-timer');
+  state.tourTimerInterval = setInterval(() => {
+    state.tourElapsedSec++;
+    const m = Math.floor(state.tourElapsedSec / 60);
+    const s = String(state.tourElapsedSec % 60).padStart(2, '0');
+    if (timerEl) {
+      timerEl.innerText = `${m}:${s} / 2:45`;
+      if (state.tourElapsedSec > 165) {
+        timerEl.style.color = '#EF4444';
+      } else {
+        timerEl.style.color = 'var(--primary)';
+      }
+    }
+  }, 1000);
+}
+
+function stopTourTimer() {
+  if (state.tourTimerInterval) {
+    clearInterval(state.tourTimerInterval);
+    state.tourTimerInterval = null;
+  }
+}
+
+function resetDemoTimer() {
+  stopTourTimer();
+  state.tourElapsedSec = 0;
+  const timerEl = document.getElementById('demo-timer');
+  if (timerEl) {
+    timerEl.innerText = '0:00 / 2:45';
+    timerEl.style.color = 'var(--primary)';
+  }
+}
+
+function handleDemoKeyboard(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+  if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
+    goToDemoStep(state.demoStep + 1);
+  } else if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') {
+    goToDemoStep(state.demoStep - 1);
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    toggleAutoTour();
+  } else if (e.key >= '1' && e.key <= '6') {
+    goToDemoStep(parseInt(e.key, 10));
+  } else if (e.key === 'r' || e.key === 'R') {
+    resetDemoTimer();
+    goToDemoStep(1);
+  }
+}
+
 
